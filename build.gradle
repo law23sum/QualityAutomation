@@ -1,5 +1,4 @@
 import org.gradle.process.internal.ExecException
-
 plugins {
     id 'java'
     id 'groovy'
@@ -9,19 +8,11 @@ plugins {
     id 'maven-publish'  // Add the maven-publish plugin to handle publishing artifacts to a Maven repository
 }
 
-group = 'com.company'
-version = '1.0.0'
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
+group   = 'com.company'
+version = '1.0-SNAPSHOT'
 
-
-configurations {
-    cucumberRuntime {
-        extendsFrom testImplementation
-    }
-}
+sourceCompatibility = 17
+targetCompatibility = 17
 
 repositories {
     mavenCentral()
@@ -35,7 +26,6 @@ ext {
     serenityJUnit5Version = '3.3.6'
     serenityCucumberVersion = '3.6.22'
     groovyMavenPluginVersion = '1.5'
-    groovyAllVersion = '3.0.15'
 }
 
 dependencies {
@@ -47,7 +37,6 @@ dependencies {
     implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
     implementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
     implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
-    implementation "org.codehaus.groovy:groovy-all:${groovyAllVersion}"
 
     // Other dependencies (commented out)
     /*
@@ -64,20 +53,24 @@ dependencies {
     */
 }
 
-defaultTasks 'dependencies', 'clean', 'compileJava', 'listTasks'
+
+defaultTasks 'dependencies', 'clean', 'build', 'listTasks'
+
+compileJava { options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" }
 
 //tasks.withType(Test).configureEach {
 //    systemProperty "cucumber.options", project.hasProperty("cucumber.options") ? project.getProperty("cucumber.options") : ""
 //}
 
-task 'deleteBuilds' {
-    delete 'build'
-    delete '.gradle'
-    delete 'lib'
-    delete 'target'
+tasks.register('deleteBuilds') {
+    doLast {
+        delete 'build'
+        delete '.gradle'
+        delete 'lib'
+        delete 'target'
+    }
 }
-
-task 'printEnvVariables' {
+tasks.register('printEnvVariables') {
     doLast {
         exec {
             commandLine 'printenv'
@@ -85,7 +78,7 @@ task 'printEnvVariables' {
     }
 }
 
-task 'printSetupVersions' {
+tasks.register('printSetupVersions') {
     doLast {
         try {
             exec {
@@ -104,18 +97,16 @@ task 'printSetupVersions' {
     }
 }
 
-task 'listTasks' {
+tasks.register('listTasks') {
     doLast {
         gradleTasks()
         genericTasks()
     }
 }
 
-def myFile = file("${rootProject.projectDir}/warmup.properties")
-
 def gradleTasks() {
     println "\nGradle Custom Tasks"
-    println "\tInitial : gradle --full-stacktrace --scan; alias gradlew=\"./gradlew\""
+    println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
     println "\tDisplay List Custom Tasks : gradlew list"
     println "\tCompile Java : gradlew compileJava"
 }
@@ -126,5 +117,5 @@ def genericTasks() {
     println "\tDisplay Current Versions : gradlew printSetupVersions"
     println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
     println "\tExecute Test Suites : gradlew test"
-    println "\tDebug : --scan --info --debug --full-stacktrace"
+    println "\tDebug :  --info --debug --full-stacktrace"
 }

@@ -102,7 +102,7 @@ def systemPropertiesSettings() {
 
 def gradleTasks() {
     println "\nGradle Custom Tasks"
-    println "\tInitial : gradle --full-stacktrace --scan; alias gradlew=\"./gradlew\""
+    println "\tInitial : gradle --full-stacktrace ; alias gradlew=\"./gradlew\""
     println "\tDisplay List Custom Tasks : gradlew list"
     println "\tCompile Java : gradlew compileJava"
 }
@@ -113,5 +113,5 @@ def genericTasks() {
     println "\tDisplay Current Versions : gradlew printSetupVersions"
     println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
     println "\tExecute Test Suites : gradlew test"
-    println "\tDebug : --scan --info --debug --full-stacktrace"
+    println "\tDebug :  --info --debug --full-stacktrace"
 }
