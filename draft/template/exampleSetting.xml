@@ -1,0 +1,7 @@
+<!-- This is a comment in an XML file -->
+<configuration>
+    <setting name="exampleSetting">
+        <!-- This comment explains the purpose of the exampleSetting -->
+        <value>true</value>
+    </setting>
+</configuration>
