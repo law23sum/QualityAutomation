@@ -5,3 +5,5 @@ https://docs.getxray.app/display/XRAY/Importing+Cucumber+Tests+-+REST
 https://docs.getxray.app/display/XRAY/Import+Execution+Results#ImportExecutionResults-CucumberJSONoutputformat
 https://docs.getxray.app/display/XRAY/Import+Execution+Results+-+REST
 https://docs.getxray.app/display/XRAY/REST+API
+https://github.com/rest-assured/rest-assured/wiki/GettingStarted
+https://serenity-bdd.github.io/docs/mobile/appium
