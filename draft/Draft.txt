@@ -1,9 +1,25 @@
+Apply Serenity BDD Gradle Plugin, Java, Groovy, IDEA, Eclipse, java-test-fixtures, and Maven Publish plugins - Applies various plugins to the Gradle project, such as the Serenity BDD Gradle Plugin for generating reports, and plugins for Java, Groovy, IDEA, Eclipse, java-test-fixtures, and Maven Publish to support development, testing, and publishing of the project.
+Set group and version for the project - Sets the group and version of the project for identification and dependency management purposes.
+Set source and target compatibility based on the 'javaVersion' property - Sets the source and target compatibility of the project based on the 'javaVersion' property, which is defined elsewhere in the Gradle configuration.
+Configure the 'cucumberRuntime' configuration which extends from 'testImplementation' - Configures the 'cucumberRuntime' configuration, which extends from 'testImplementation' and is used for managing Cucumber-related dependencies.
+Configure the IDEA plugin to download Javadoc and sources - Configures the IDEA plugin to download Javadoc and sources for better code understanding and debugging.
+Add Maven Central as a repository for dependencies - Adds Maven Central as a repository for downloading dependencies.
+Define the versions of your dependencies using the 'ext' block - Defines the versions of dependencies using the 'ext' block to manage dependency versions in a centralized way.
+Add the dependencies for the project, including core dependencies, test dependencies, Serenity, and Cucumber integration - Adds the necessary dependencies for the project, including core dependencies for production code, test dependencies for testing, and dependencies for integrating Serenity and Cucumber for testing.
+Configure the 'publishing' block for MavenPublication - Configures the 'publishing' block for MavenPublication to handle publishing artifacts to a Maven repository.
+Add compiler arguments for Java compilation - Adds compiler arguments for Java compilation, such as enabling linting and deprecation warnings.
+Configure the 'test' task to use JUnit Platform, set various system properties for Cucumber, include the TestSuiteRunner class, and configure test logging - Configures the 'test' task to use JUnit Platform for executing JUnit and Cucumber tests, sets various system properties for Cucumber, includes the TestSuiteRunner class for Cucumber, and configures test logging for better reporting.
+Configure the 'javaexec' task to execute Cucumber tests - Configures the 'javaexec' task to execute Cucumber tests for running feature files with the Cucumber test framework.
+Set the encoding for JavaCompile tasks - Sets the encoding for JavaCompile tasks to UTF-8 for better character support.
+Set the default tasks for the project - Sets the default tasks for the project to execute when no tasks are specified, such as listing dependencies, cleaning the build directory, compiling Java, and listing available tasks.
 
-group = 'com.company'
-version = '0.0.1'
-sourceCompatibility = 17
-targetCompatibility = 17
 
+<<<<<<< HEAD
+alias gradlew="./gradlew"
+gradlew test -Pcucumber.namingStrategy="long" -Pcucumber.features="path/to/your/feature/files" -Pcucumber.tags="@your-tag" -Pwebdriver.baseUrl="http://your-base-url"
+gradlew assemble buildDependents
+gradlew test aggregate
+=======
 configurations {
     cucumberRuntime {
         extendsFrom testImplementation
@@ -115,3 +131,4 @@ def genericTasks() {
     println "\tExecute Test Suites : gradlew test"
     println "\tDebug :  --info --debug --full-stacktrace"
 }
+>>>>>>> master
