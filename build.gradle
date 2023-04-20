@@ -14,6 +14,7 @@
  11. Test execution configuration: Configure
  */
 
+// Section 1: Plugins
 plugins {
 //   id 'net.serenity-bdd.aggregator' version '3.5.0'
    id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
@@ -36,6 +37,7 @@ description = 'Quality Automation'
 import org.gradle.process.internal.ExecException
 import au.com.bytecode.opencsv.CSVReader
 
+// Section 3: Java source and target compatibility
 sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 
@@ -44,6 +46,7 @@ jar {
    archiveVersion =  '0.0.1'
 }
 
+// Section 4: IDEA project configuration
 idea {
    module {
       downloadJavadoc = true
@@ -51,6 +54,7 @@ idea {
    }
 }
 
+// Section 5: Repositories
 repositories {
    mavenCentral()
    google()
@@ -68,8 +72,7 @@ configurations {
    }
 }
 
-
-
+// Section 6: External dependency versions
 ext {
    junitVersion = '5.9.2'
    cucumberJavaVersion = '7.11.2'
@@ -84,6 +87,7 @@ ext {
    seleniumVersion = '4.8.1'
 }
 
+// Section 7: Dependencies
 dependencies {
    // JUnit 4 for backward compatible + JUnit 5
    testImplementation 'junit:junit:4.13.1'
@@ -123,14 +127,9 @@ dependencies {
    implementation 'com.opencsv:opencsv:5.7.0'
 }
 
-tasks.withType(JavaCompile).configureEach {
-   options.encoding = 'UTF-8'
-}
 
-tasks.withType(GroovyCompile).configureEach {
-   groovyOptions.encoding = 'UTF-8'
-}
 
+// Section 8: Source sets configuration
 sourceSets {
    main {
       java {
@@ -150,10 +149,30 @@ sourceSets {
    }
 }
 
+// Section 9: Maven publishing configuration
+publishing {
+   publications {
+      mavenJava(MavenPublication) {
+         from components.java
+      }
+   }
+}
+
+// Section 10: Compiler options
+tasks.withType(JavaCompile).configureEach {
+   options.encoding = 'UTF-8'
+   options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+}
+
+tasks.withType(GroovyCompile).configureEach {
+   groovyOptions.encoding = 'UTF-8'
+}
+
 def envProperties = new Properties()
 file("env.properties").withInputStream { envProperties.load(it) }
 
-// Test execution configuration
+
+// Section 11: Test execution configuration
 test {
    useJUnitPlatform()
    systemProperties System.getProperties()
