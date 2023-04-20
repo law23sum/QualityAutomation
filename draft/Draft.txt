@@ -2,10 +2,14 @@ gradlew test aggregate
 gradlew test -Pcucumber.features="path/to/your/features" -Pcucumber.glue="com.example.stepdefs"
 gradle clean compileJava test importJUnitResultsToXrayDC
 gradlew test -PselectedEnv=staging
+
+
+
 https://docs.getxray.app/display/XRAY/Integration+with+eazyBI
 https://docs.getxray.app/display/XRAY/Importing+Cucumber+Tests+-+REST
 https://docs.getxray.app/display/XRAY/Import+Execution+Results#ImportExecutionResults-CucumberJSONoutputformat
 https://docs.getxray.app/display/XRAY/Import+Execution+Results+-+REST
 https://docs.getxray.app/display/XRAY/REST+API
 https://github.com/rest-assured/rest-assured/wiki/GettingStarted
+https://serenity-bdd.github.io/docs/mobile/appium
 https://serenity-bdd.github.io/docs/mobile/appium

@@ -15,7 +15,7 @@
  */
 
 plugins {
-/* id 'net.serenity-bdd.aggregator' version '3.5.0'*/
+   id 'net.serenity-bdd.aggregator' version '3.5.0'
    id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
    id 'java'
    id 'org.gradle.java-library'
@@ -203,6 +203,8 @@ tasks {
 def envProperties = new Properties()
 file("env.properties").withInputStream { envProperties.load(it) }
 
+
+
 // Test execution configuration
 test {
    useJUnitPlatform()
@@ -213,11 +215,12 @@ test {
    systemProperty 'cucumber.glue', 'com.company.steps'
    systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
    systemProperty "serenity.outputDirectory", project.findProperty("serenity.outputDirectory") ?: "target/site"
-   systemProperty "serenity.project.name", project.findProperty("serenity.project.name") ?: "Your Project Name"
-   systemProperty "serenity.test.root", project.findProperty("serenity.test.root") ?: "src/test/resources"
-   // Update the path if necessary
-   systemProperty "serenity.requirements.directory", project.findProperty("serenity.requirements.directory") ?: "src/test/resources/features"
-   // Update the path if necessary
+   systemProperty "serenity.project.name", project.findProperty("serenity.project.name") ?: "Quality Automation"
+
+   // Add the following lines:
+   systemProperty "serenity.test.root", "src/test/resources" // Update the path if necessary
+   systemProperty "serenity.requirements.directory", "src/test/resources/features" // Update the path if necessary
+ 
 
    // Test logging configuration
    testLogging.showStandardStreams = true
