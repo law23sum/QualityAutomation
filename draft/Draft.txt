@@ -1,9 +1,19 @@
 gradlew test aggregate
 gradle clean compileJava test importJUnitResultsToXrayDC
-gradlew test -PselectedEnv=staging
+gradlew test
 gradlew tasks
-gradlew test -Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature" -Pcucumber.glue="com.company.steps"
-gradlew test -Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature" -Pcucumber.glue="com.company.steps"
+gradlew test -Pcucumber.features="src/test/resources/features" -Pcucumber.glue="com.company.steps"
+gradlew test -Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature" -Pcucumber.glue="com.company.steps" -Pcucumber.tags="@tag1 or @tag2" -Pcucumber.options="--plugin json:target/cucumber-report.json" -PmaxParallelForks=4 --info --tests "com.company.tests.SomeTestClass"
+
+gradlew clean compileJava test
+-Pcucumber.glue="com.company.steps"
+-Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature"
+-Pcucumber.tags="@tag1 or @tag2"
+-Pcucumber.options="--plugin json:target/cucumber-report.json"
+-PmaxParallelForks=4
+--PselectedEnv=staging
+--info or --debug or --quiet or --warn
+--tests "com.company.tests.SomeTestClass"
 
 
 https://docs.getxray.app/display/XRAY/Integration+with+eazyBI
