@@ -3,7 +3,7 @@ gradle clean compileJava test importJUnitResultsToXrayDC
 gradlew test -PselectedEnv=staging
 gradlew tasks
 gradlew test -Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature" -Pcucumber.glue="com.company.steps"
- gradlew test -Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature" -Pcucumber.glue="com.company.steps"
+gradlew test -Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature" -Pcucumber.glue="com.company.steps"
 
 
 https://docs.getxray.app/display/XRAY/Integration+with+eazyBI
