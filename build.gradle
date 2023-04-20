@@ -1,22 +1,34 @@
-import org.gradle.process.internal.ExecException
 plugins {
+    id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
     id 'java'
     id 'groovy'
     id 'idea'
     id 'eclipse'
     id 'java-test-fixtures'
-    id 'maven-publish'  // Add the maven-publish plugin to handle publishing artifacts to a Maven repository
+    id 'maven-publish'  // handle publishing artifacts to Maven repo
+    // experiment
+    id 'com.jfrog.bintray' version '1.8.5'
 }
 
 group   = 'com.company'
 version = '1.0-SNAPSHOT'
 
-sourceCompatibility = 17
-targetCompatibility = 17
+import org.gradle.process.internal.ExecException
+import org.gradle.util.GradleVersion
+
+sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
+targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 
 configurations {
     cucumberRuntime {
         extendsFrom testImplementation
+    }
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
     }
 }
 
@@ -26,24 +38,36 @@ repositories {
 
 ext {
     junitVersion = '5.8.2'
-    cucumberJavaVersion = '7.11.2'
+    cucumberJavaVersion = '7.4.1'
     cucumberJUnitPlatformEngineVersion = '7.11.2'
     serenityCoreVersion = '3.3.6'
     serenityJUnit5Version = '3.3.6'
-    serenityCucumberVersion = '3.6.22'
+    serenityCucumberVersion = '3.3.22'
     groovyMavenPluginVersion = '1.5'
+    slf4jApiVersion = '2.0.7'
 }
 
 dependencies {
+    // Core dependencies for production code
+    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
+
+    // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testImplementation 'junit:junit:4.13.1'
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
     testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
-    implementation "net.serenity-bdd:serenity-core:${serenityCoreVersion}"
-    implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
-    implementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
-    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
 
+//    // Serenity and Cucumber integration for testing
+//    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
+    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
+    implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
+
+    // Serenity Core Dependencies (plusible removal of Junit if Cucumber Can
+    /*
+    implementation "net.serenity-bdd:serenity-core:${serenityCoreVersion}"
+    implementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
+    */
     // Other dependencies (commented out)
     /*
     // Selenium WebDriver - Browser automation framework
@@ -51,25 +75,14 @@ dependencies {
 
     // Appium - Mobile automation framework
     testImplementation 'io.appium:java-client:7.3.0'
-
-    // Log4j - Logging framework
-    implementation 'org.apache.logging.log4j:log4j-api:2.13.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.13.1'
-    implementation 'org.apache.logging.log4j:log4j-slf4j18-impl:2.13.1'
     */
 }
 
-test {
-    useJUnitPlatform()
-    systemProperty("cucumber.junit-platform.naming-strategy", "long")
-    systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
-    systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
-    systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    include 'com/company/runner/WebAppRunner.class'
-    testLogging {
-        events 'passed', 'skipped', 'failed'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
     }
 }
 
@@ -77,29 +90,44 @@ compileJava {
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
-defaultTasks 'dependencies', 'clean', 'build', 'compileJava', 'listTasks'
+test {
+    doFirst {
+        // Configure the test execution using the JUnit Platform
+        useJUnitPlatform()
+        systemProperty("cucumber.junit-platform.naming-strategy", "long")
+        systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
+        systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
+        systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+        include 'com/company/runner/TestSuiteRunner.class'
+        testLogging {
+            events 'passed', 'skipped', 'failed'
+        }
+    }
 
-tasks.withType(Test).configureEach {
-
-}
-
-tasks.register('cucumber') {
-    dependsOn testClasses
     doLast {
+        // Execute Cucumber tests
         javaexec {
             main = "io.cucumber.core.cli.Main"
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--glue', 'com.example.stepdefinitions', '--plugin', 'pretty', '--plugin', 'json:build/reports/cucumber/cucumber.json', 'src/test/resources/features']
+            args = ['--glue', 'com.company.steps', '--plugin', 'pretty', '--plugin', 'json:build/reports/cucumber/cucumber.json', 'src/test/resources/features']
         }
     }
+}
+
+defaultTasks 'dependencies', 'clean', 'compileJava', 'listTasks'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 tasks.register('deleteBuilds') {
     doLast {
         delete 'build'
         delete '.gradle'
-        delete 'lib'
         delete 'target'
+        // delete 'lib'
     }
 }
 tasks.register('printEnvVariables') {
@@ -136,6 +164,8 @@ tasks.register('listTasks') {
     }
 }
 
+def gradleWrapperVersion = findProperty('gradleWrapperVersion') ?: properties['gradleWrapperVersion']
+
 def gradleTasks() {
     println "\nGradle Custom Tasks"
     println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
@@ -145,9 +175,12 @@ def gradleTasks() {
 
 def genericTasks() {
     println "\nGeneral Custom Tasks"
-    println "\tDisplay Local Environments : gradlew printEnvVariables"
-    println "\tDisplay Current Versions : gradlew printSetupVersions"
+    println "\tDisplay Local Environments   : gradlew printEnvVariables"
+    println "\tDisplay Current Versions     : gradlew printSetupVersions"
+    println "\tUpgrade Gradle Version       : gradlew --gradle-version <_._>"
     println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
-    println "\tExecute Test Suites : gradlew test"
-    println "\tDebug :  --info --debug --full-stacktrace"
+    println "\tDisplay Gradle Default Tasks : gradlew tasks"
+    println "\tExecute Test Suites          : gradlew test"
+    println "\tDebug Argument Options       : gradlew --info|--debug|--full-stacktrace"
+    println "\tDebug Dependency Reports     : gradlew dependencyInsight --dependency <org.company.package:dependency>"
 }
