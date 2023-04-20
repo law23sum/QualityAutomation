@@ -2,12 +2,12 @@ Feature: Web Apps Scenarios Specific Zero
 
   @Smoke
   Scenario: Login
-    Given an event
+    * the user opens the application
 
   @Regression
   Scenario: Interact
-    When a situation
+    * the user performs some action
 
   @E2E
   Scenario: Validation
-    Then a conclusion
+    * the user should see the expected result

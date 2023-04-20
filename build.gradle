@@ -34,19 +34,17 @@ version = '1.0-SNAPSHOT'
 description = 'Quality Automation'
 
 import org.gradle.process.internal.ExecException
+import au.com.bytecode.opencsv.CSVReader
+
+
+sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
+targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 
 jar {
    archiveBaseName = 'QualityAutomation'
    archiveVersion =  '0.0.1'
 }
 
-sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
-targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
-
-jar {
-   archiveBaseName = 'tutorial-gradle-junit4-basic'
-   archiveVersion =  '0.1.0'
-}
 idea {
    module {
       downloadJavadoc = true
@@ -160,7 +158,7 @@ tasks.withType(JavaCompile).configureEach {
    options.encoding = 'UTF-8'
 }
 
-tasks.withType(GroovyCompile) {
+tasks.withType(GroovyCompile).configureEach {
    groovyOptions.encoding = 'UTF-8'
 }
 
@@ -169,17 +167,44 @@ sourceSets {
       java {
          srcDir 'src/main/java'
       }
+      resources {
+         srcDirs = ['src/main/resources', 'src/main/groovy-resources']
+      }
    }
    test {
       java {
          srcDir 'src/test/java'
       }
+      resources {
+         srcDirs = ['src/test/resources', 'src/test/groovy-resources']
+      }
    }
 }
- 
+
+tasks {
+   // Compile and package the application code
+   assemble {
+      // ...
+   }
+
+   // Run the Serenity CLI task
+   serenity {
+      dependsOn assemble
+      doLast {
+         javaexec {
+            main = 'net.serenitybdd.cli.SerenityCLI'
+            classpath = configurations.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+            args = ['aggregate']
+         }
+      }
+   }
+}
+
 def envProperties = new Properties()
 file("env.properties").withInputStream { envProperties.load(it) }
- 
+
+
+
 // Test execution configuration
 test {
    useJUnitPlatform()
@@ -204,115 +229,106 @@ test {
    testLogging {
       events 'passed', 'skipped', 'failed'
    }
+
+   def selectedEnv = project.findProperty('selectedEnv') ?: 'default'
+   envProperties.entrySet().each { entry ->
+      if (entry.key.startsWith("$selectedEnv.")) {
+         systemProperty entry.key - "$selectedEnv.", entry.value
+      }
+   }
    // Experimentation
-   //  Jira server/DC specifics
-/*   jiraBaseUrl=https://jiraserver.local
-   jiraUsername=someuser
-   jiraPassword=somepass
-
-   reportFormat=junit
-   projectKey=CALC
-   version=v1.0
-   revision=123
-   testPlanKey=CALC-726
-   testExecKey=
-   testEnvironment=
-*/
 }
-   gradle.startParameter.continueOnFailure = true
+gradle.startParameter.continueOnFailure = true
 
-   defaultTasks 'dependencies', 'clean', 'build', 'listTasks'
-
+defaultTasks 'dependencies', 'clean', 'build', 'listTasks'
 
 tasks.register('deleteBuilds') {
-      doLast {
-         delete 'build'
-         delete '.gradle'
-         delete 'target'
-         // delete 'lib'
+   doLast {
+      delete 'build'
+      delete '.gradle'
+      delete 'target'
+      // delete 'lib'
+   }
+}
+
+tasks.register('printEnvVariables') {
+   doLast {
+      exec {
+         commandLine 'printenv'
       }
    }
-   tasks.register('printEnvVariables') {
-      doLast {
+}
+
+tasks.register('verifyEnvironment') {
+   doLast {
+      try {
          exec {
-            commandLine 'printenv'
+            commandLine 'java', '--version'
+            ignoreExitValue true
+            commandLine 'groovy', '--version'
+            ignoreExitValue true
+            commandLine 'mvn', '--version'
+            ignoreExitValue true
+            commandLine 'gradle', '--version'
+            ignoreExitValue true
          }
+      } catch (ExecException e) {
+         println "One or more commands are not installed: ${e.message}"
       }
    }
+}
+tasks.register('Lists') {
+   doLast {
+      gradleTasks()
+      genericTasks()
+   }
+}
 
-   tasks.register('verifyEnvironment') {
-      doLast {
-         try {
-            exec {
-               commandLine 'java', '--version'
-               ignoreExitValue true
-               commandLine 'groovy', '--version'
-               ignoreExitValue true
-               commandLine 'mvn', '--version'
-               ignoreExitValue true
-               commandLine 'gradle', '--version'
-               ignoreExitValue true
-            }
-         } catch (ExecException e) {
-            println "One or more commands are not installed: ${e.message}"
-         }
-      }
+tasks.register('importJUnitResultsToXrayDC', Exec) {
+   description 'Imports Junit test results to Xray Test Management for Jira DC.'
+   dependsOn 'test'
+
+   // the following variables can be defined locally or in gradle.properties
+   //  - jiraBaseUrl, jiraUsername, jiraPassword
+   //  - reportFormat, projectKey version, revision, testPlanKey, testExecKey, testEnvironment
+
+   def reportFile = "reports/TEST-junit-jupiter.xml"
+
+   def url = "${jiraBaseUrl}/rest/raven/2.0/import/execution/${reportFormat}?"
+   if (projectKey?.trim()) {
+      url += "&projectKey=${projectKey}"
+   }
+   if (version?.trim()) {
+      url += "&fixVersion=${version}"
+   }
+   if (revision?.trim()) {
+      url += "&revision=${revision}"
+   }
+   if (testPlanKey?.trim()) {
+      url += "&testPlanKey=${testPlanKey}"
+   }
+   if (testExecKey?.trim()) {
+      url += "&testExecKey=${testExecKey}"
+   }
+   if (testEnvironment?.trim()) {
+      url += "&testEnvironments=${testEnvironment}"
    }
 
-   tasks.register('Lists') {
-      doLast {
-         gradleTasks()
-         genericTasks()
+   commandLine 'curl', '--fail-with-body', '-H', 'Content-Type: multipart/form-data', '-u', "${jiraUsername}:${jiraPassword}", '-F', "file=@${reportFile}", url
+
+   //store the output instead of printing to the console:
+   standardOutput = new ByteArrayOutputStream()
+   ignoreExitValue = false //true
+
+   doLast {
+      if (execResult.getExitValue() != 0) {
+         println "ERROR: problem importing results to Xray"
+      } else {
+         println "Results imported to Xray!"
       }
+      println standardOutput.toString()
    }
-
-   tasks.register('importJUnitResultsToXrayDC', Exec) {
-      description 'Imports Junit test results to Xray Test Management for Jira DC.'
-      dependsOn 'test'
-
-      // the following variables can be defined locally or in gradle.properties
-      //  - jiraBaseUrl, jiraUsername, jiraPassword
-      //  - reportFormat, projectKey version, revision, testPlanKey, testExecKey, testEnvironment
-
-      def reportFile = "reports/TEST-junit-jupiter.xml"
-
-      def url = "${jiraBaseUrl}/rest/raven/2.0/import/execution/${reportFormat}?"
-      if (projectKey?.trim()) {
-         url += "&projectKey=${projectKey}"
-      }
-      if (version?.trim()) {
-         url += "&fixVersion=${version}"
-      }
-      if (revision?.trim()) {
-         url += "&revision=${revision}"
-      }
-      if (testPlanKey?.trim()) {
-         url += "&testPlanKey=${testPlanKey}"
-      }
-      if (testExecKey?.trim()) {
-         url += "&testExecKey=${testExecKey}"
-      }
-      if (testEnvironment?.trim()) {
-         url += "&testEnvironments=${testEnvironment}"
-      }
-
-      commandLine 'curl', '--fail-with-body', '-H', 'Content-Type: multipart/form-data', '-u', "${jiraUsername}:${jiraPassword}", '-F', "file=@${reportFile}", url
-
-      //store the output instead of printing to the console:
-      standardOutput = new ByteArrayOutputStream()
-      ignoreExitValue = false //true
-
-      doLast {
-         if (execResult.getExitValue() != 0) {
-            println "ERROR: problem importing results to Xray"
-         } else {
-            println "Results imported to Xray!"
-         }
-         println standardOutput.toString()
-      }
-   }
-
-import au.com.bytecode.opencsv.CSVReader
+}
 
 tasks.register('updateJiraStatus') {
    doLast {
@@ -358,27 +374,29 @@ tasks.register('updateJiraStatus') {
 }
 
 // Define jiraConnector extension
-   ext.jiraConnector = [
-           qualityAutomation: "Your JIRA Connector Configuration"
-   ]
+ext.jiraConnector = [
+        qualityAutomation: "Your JIRA Connector Configuration"
+]
 
-   def gradleTasks() {
-      println "\nGradle Custom Tasks"
-      println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
-      println "\tDisplay List Custom Tasks : gradlew list"
-      println "\tCompile Java : gradlew compileJava"
-   }
+def gradleTasks() {
+   println "\nGradle Custom Tasks"
+   println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
+   println "\tDisplay List Custom Tasks : gradlew list"
+   println "\tCompile Java : gradlew compileJava"
+}
 
-   def genericTasks() {
-      println "\nGeneral Custom Tasks"
-      println "\tDisplay Local Environments   : gradlew printEnvVariables"
-      println "\tDisplay Current Versions     : gradlew printSetupVersions"
-      println "\tUpgrade Gradle Version       : gradlew --gradle-version <_._>"
-      println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
-      println "\tDisplay Gradle Default Tasks : gradlew task"
-      println "\tExecute Test Suites          : gradlew test"
-      println "\tDebug Argument Options       : gradlew --info|--debug|--full-stacktrace"
-      println "\tDebug Dependency Reports     : gradlew dependencyInsight --dependency <org.company.package:dependency>"
-      println "\tExecute Test Suites          : gradlew test"
-      println "\tDebug :                      : --info --debug --full-stacktrace"
-   }
+def genericTasks() {
+   println "\nGeneral Custom Tasks"
+   println "\tDisplay Local Environments   : gradlew printEnvVariables"
+   println "\tDisplay Current Versions     : gradlew printSetupVersions"
+   println "\tUpgrade Gradle Version       : gradlew --gradle-version <_._>"
+   println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
+   println "\tDisplay Gradle Default Tasks : gradlew task"
+   println "\tExecute Test Suites          : gradlew test"
+   println "\tDebug Argument Options       : gradlew --info|--debug|--full-stacktrace"
+   println "\tDebug Dependency Reports     : gradlew dependencyInsight --dependency <org.company.package:dependency>"
+   println "\tExecute Test Suites          : gradlew test"
+   println "\tDebug :                      : --info --debug --full-stacktrace"
+}
+
+gradle.startParameter.setTaskNames(['clean', 'test', 'aggregate'])
