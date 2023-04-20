@@ -1,134 +1,40 @@
-Apply Serenity BDD Gradle Plugin, Java, Groovy, IDEA, Eclipse, java-test-fixtures, and Maven Publish plugins - Applies various plugins to the Gradle project, such as the Serenity BDD Gradle Plugin for generating reports, and plugins for Java, Groovy, IDEA, Eclipse, java-test-fixtures, and Maven Publish to support development, testing, and publishing of the project.
-Set group and version for the project - Sets the group and version of the project for identification and dependency management purposes.
-Set source and target compatibility based on the 'javaVersion' property - Sets the source and target compatibility of the project based on the 'javaVersion' property, which is defined elsewhere in the Gradle configuration.
-Configure the 'cucumberRuntime' configuration which extends from 'testImplementation' - Configures the 'cucumberRuntime' configuration, which extends from 'testImplementation' and is used for managing Cucumber-related dependencies.
-Configure the IDEA plugin to download Javadoc and sources - Configures the IDEA plugin to download Javadoc and sources for better code understanding and debugging.
-Add Maven Central as a repository for dependencies - Adds Maven Central as a repository for downloading dependencies.
-Define the versions of your dependencies using the 'ext' block - Defines the versions of dependencies using the 'ext' block to manage dependency versions in a centralized way.
-Add the dependencies for the project, including core dependencies, test dependencies, Serenity, and Cucumber integration - Adds the necessary dependencies for the project, including core dependencies for production code, test dependencies for testing, and dependencies for integrating Serenity and Cucumber for testing.
-Configure the 'publishing' block for MavenPublication - Configures the 'publishing' block for MavenPublication to handle publishing artifacts to a Maven repository.
-Add compiler arguments for Java compilation - Adds compiler arguments for Java compilation, such as enabling linting and deprecation warnings.
-Configure the 'test' task to use JUnit Platform, set various system properties for Cucumber, include the TestSuiteRunner class, and configure test logging - Configures the 'test' task to use JUnit Platform for executing JUnit and Cucumber tests, sets various system properties for Cucumber, includes the TestSuiteRunner class for Cucumber, and configures test logging for better reporting.
-Configure the 'javaexec' task to execute Cucumber tests - Configures the 'javaexec' task to execute Cucumber tests for running feature files with the Cucumber test framework.
-Set the encoding for JavaCompile tasks - Sets the encoding for JavaCompile tasks to UTF-8 for better character support.
-Set the default tasks for the project - Sets the default tasks for the project to execute when no tasks are specified, such as listing dependencies, cleaning the build directory, compiling Java, and listing available tasks.
 
-
-<<<<<<< HEAD
-alias gradlew="./gradlew"
-gradlew test -Pcucumber.namingStrategy="long" -Pcucumber.features="path/to/your/feature/files" -Pcucumber.tags="@your-tag" -Pwebdriver.baseUrl="http://your-base-url"
-gradlew assemble buildDependents
-gradlew test aggregate
-=======
-configurations {
-    cucumberRuntime {
-        extendsFrom testImplementation
-    }
+ext {
+    junitVersion = '5.9.2'
+    cucumberJavaVersion = '7.11.2'
+    cucumberJUnitPlatformEngineVersion = '7.11.2'
+    serenityCoreVersion = '3.3.6'
+    serenityJUnit5Version = '3.3.6'
+    serenityCucumberVersion = '3.6.22'
+    groovyMavenPluginVersion = '1.5'
+    slf4jApiVersion = '2.0.7'
+    restAssuredVersion = '5.3.0'
+    seleniumVersion = '4.8.1'
 }
 
-repositories {
-    mavenCentral()
-}
-
+// Dependencies for the project
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-    testImplementation 'io.cucumber:cucumber-java:7.11.2'
-    testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.11.2'
-    implementation 'net.serenity-bdd:serenity-core:3.3.6'
-    implementation 'net.serenity-bdd:serenity-junit5:3.3.6'
-    implementation 'net.serenity-bdd:serenity-cucumber:3.6.22'
-    implementation 'org.codehaus.mojo:groovy-maven-plugin:1.5'
-}
 
-test {
-    useJUnitPlatform()
-    systemProperty("cucumber.junit-platform.naming-strategy", "long")
-    systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
-    systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
-    systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    include 'com/company/runner/WebAppRunner.class'
-    testLogging {
-        events 'passed', 'skipped', 'failed'
-    }
-}
 
-compileJava {
-    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-}
 
-defaultTasks 'dependencies', 'clean', 'build', 'compileJava', 'listTasks'
+    // Cucumber
+    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
 
-task listTasks {
-    doLast {
-        gradleTasks()
-        genericTasks()
-    }
-}
+    // Serenity and Cucumber integration
+    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
+    implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
 
-task printSetupVersions {
-    doLast {
-        try {
-            exec {
-                commandLine 'java', '--version'
-                ignoreExitValue true
-                commandLine 'groovy', '--version'
-                ignoreExitValue true
-                commandLine 'mvn', '--version'
-                ignoreExitValue true
-                commandLine 'gradle', '--version'
-                ignoreExitValue true
-            }
-        } catch (org.gradle.process.internal.ExecException e) {
-            println "One or more commands are not installed: ${e.message}"
-        }
-    }
-}
+    // REST Assured
+    testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
 
-task cucumber {
-    dependsOn testClasses
-    doLast {
-        javaexec {
-        }
-    }
-}
+    // Appium Java client
+    implementation 'io.appium:java-client:7.6.0'
 
-task printEnvVariables {
-    doLast {
-        exec {
-            commandLine 'printenv'
-        }
-    }
-}
+    // Selenium WebDriver
+    testImplementation 'org.seleniumhq.selenium:selenium-java:${seleniumVersion}'
 
-task deleteBuilds {
-    delete 'build'
-    delete '.gradle'
-    delete 'lib'
-    delete 'target'
+    // Groovy
+    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
+    implementation 'org.codehaus.groovy:groovy-all:2.4.15'
 }
-
-def systemPropertiesSettings() {
-    exec {
-        commandLine 'export', 'CUCUMBER_PUBLISH_ENABLED=true'
-    }
-}
-
-def gradleTasks() {
-    println "\nGradle Custom Tasks"
-    println "\tInitial : gradle --full-stacktrace ; alias gradlew=\"./gradlew\""
-    println "\tDisplay List Custom Tasks : gradlew list"
-    println "\tCompile Java : gradlew compileJava"
-}
-
-def genericTasks() {
-    println "\nGeneral Custom Tasks"
-    println "\tDisplay Local Environments : gradlew printEnvVariables"
-    println "\tDisplay Current Versions : gradlew printSetupVersions"
-    println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
-    println "\tExecute Test Suites : gradlew test"
-    println "\tDebug :  --info --debug --full-stacktrace"
-}
->>>>>>> master

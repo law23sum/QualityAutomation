@@ -1,15 +1,31 @@
+/***
+ This `build.gradle` file is organized into the following sections:
+
+ 1. Plugins: Define the plugins required for the project.
+ 2. Basic project information: Set the project's group, version, and description.
+ 3. Java source and target compatibility: Configure the Java version.
+ 4. IDEA project configuration: Configure the IntelliJ IDEA project settings.
+ 5. Repositories: Define the repositories for fetching dependencies.
+ 6. External dependency versions: Set the versions for external dependencies.
+ 7. Dependencies: Define the project dependencies.
+ 8. Source sets configuration: Configure the source sets for the project.
+ 9. Maven publishing configuration: Configure the Maven publishing settings.
+ 10. Compiler options: Set the Java compiler options.
+ 11. Test execution configuration: Configure
+ */
+
 plugins {
-    id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
-    id 'java'
-    id 'org.gradle.java-library'
-    id 'groovy'
-    id 'idea'
-    id 'eclipse'
-    id 'java-test-fixtures'
-    id 'maven-publish'  // handle publishing artifacts to Maven repo
-    // experiment
-    id 'com.jfrog.bintray' version '1.8.5'
-    id 'com.intershop.gradle.jiraconnector' version '6.3.0'
+   id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
+   id 'java'
+   id 'org.gradle.java-library'
+   id 'groovy'
+   id 'idea'
+   id 'eclipse'
+   id 'java-test-fixtures'
+   id 'maven-publish'  // handle publishing artifacts to Maven repo
+   // experiment
+   id 'com.jfrog.bintray' version '1.8.5'
+   id 'com.intershop.gradle.jiraconnector' version '6.3.0'
 }
 
 group = 'com.company'
@@ -22,181 +38,191 @@ sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 
 idea {
-    module {
-        downloadJavadoc = true
-        downloadSources = true
-    }
+   module {
+      downloadJavadoc = true
+      downloadSources = true
+   }
 }
 
 repositories {
-    mavenCentral()
-    google()
+   mavenCentral()
+   google()
+}
+
+configurations {
+   cucumberRuntime {
+      extendsFrom testImplementation
+   }
+}
+
+configurations.all {
+   resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+      if (details.requested.group == 'org.codehaus.groovy' && details.requested.name == 'groovy') {
+         details.useVersion '3.0.16'
+      }
+   }
 }
 
 ext {
-    junitVersion = '5.9.2'
-    cucumberJavaVersion = '7.11.2'
-    cucumberJUnitPlatformEngineVersion = '7.11.2'
-    serenityCoreVersion = '3.3.6'
-    serenityJUnit5Version = '3.3.6'
-    serenityCucumberVersion = '3.6.22'
-    groovyMavenPluginVersion = '1.5'
-    slf4jApiVersion = '2.0.7'
-    restAssuredVersion = '5.3.0'
-    seleniumVersion = '4.8.1'
+   junitVersion = '5.9.2'
+   cucumberJavaVersion = '7.11.2'
+   cucumberJUnitPlatformEngineVersion = '7.11.2'
+   serenityCoreVersion = '3.3.6'
+   serenityJUnit5Version = '3.6.12'
+   serenityCucumberVersion = '3.6.22'
+   groovyMavenPluginVersion = '1.5'
+   slf4jApiVersion = '2.0.7'
+   restAssuredVersion = '5.3.0'
+   seleniumVersion = '4.8.1'
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13.1'
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
-    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
-    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
+   // JUnit 4 for backward compatible + JUnit 5
+   testImplementation 'junit:junit:4.13.1'
+   testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+   testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
+   testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
 
-    // Serenity and Cucumber integration for testing
-    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
-    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
-    implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
+   // Serenity and Cucumber integration for testing
+   testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
+   implementation("net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}") {
+      exclude group: 'org.seleniumhq.selenium', module: 'selenium-java'
+   }
 
-    testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
+   testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
 
-    // For using WinAppDriver
-    // Appium Java client
-    implementation 'io.appium:java-client:7.6.0'
+   // For using WinAppDriver
+   // Appium Java client
+   implementation 'io.appium:java-client:8.3.0'
 
-    // Selenium WebDriver
-    testImplementation 'org.seleniumhq.selenium:selenium-java:${seleniumVersion}'
-    // Groovy
-    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
-    implementation 'org.codehaus.groovy:groovy-all:2.4.15'
+   // Selenium WebDriver
+   testImplementation "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
+   // Groovy
+   implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
+   implementation 'org.codehaus.groovy:groovy-all:2.4.15'
 
-    // Test dependencies
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+   // Test dependencies
+   testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
 }
 
+
 sourceSets {
-    main {
-        java {
-            srcDir 'src/main/java'
-        }
-    }
-    test {
-        java {
-            srcDir 'src/test/java'
-        }
-    }
+   main {
+      java {
+         srcDir 'src/main/java'
+      }
+   }
+   test {
+      java {
+         srcDir 'src/test/java'
+      }
+   }
 }
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
+   publications {
+      mavenJava(MavenPublication) {
+         from components.java
+      }
+   }
 }
 
 compileJava {
-    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+   options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
+// Test execution configuration
 test {
-    include '**/*Test.class', '**/*IT.class', 'com/company/runner/TestSuiteRunner.class'
-    doFirst {
-        // Configure the test execution using the JUnit Platform
-        useJUnitPlatform()
-        systemProperties System.getProperties()
+   include 'Test.class', 'IT.class', 'com/company/runner/TestSuiteRunner.class'
+   doFirst {
+// Configure the test execution using the JUnit Platform
+      useJUnitPlatform()
+      systemProperties System.getProperties()
+      // Configure Cucumber and Serenity
+      systemProperty("cucumber.junit-platform.naming-strategy", "long")
+      systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
+      systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
+      systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
+      systemProperty "serenity.outputDirectory", project.findProperty("serenity.outputDirectory") ?: "target/site/serenity"
+      systemProperty "serenity.project.name", project.findProperty("serenity.project.name") ?: "Your Project Name"
 
-        systemProperty("cucumber.junit-platform.naming-strategy", "long")
-        systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
-        systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
-        systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
-
-        // Move more properties to build.gradle
-        systemProperty "serenity.outputDirectory", project.findProperty("serenity.outputDirectory") ?: "target/site/serenity"
-        systemProperty "serenity.project.name", project.findProperty("serenity.project.name") ?: "Your Project Name"
-
-        testLogging.showStandardStreams = true
-        testClassesDirs = sourceSets.test.output.classesDirs
-        classpath = sourceSets.test.runtimeClasspath
-        testLogging {
-            events 'passed', 'skipped', 'failed'
-        }
-    }
+      // Test logging configuration
+      testLogging.showStandardStreams = true
+      testClassesDirs = sourceSets.test.output.classesDirs
+      classpath = sourceSets.test.runtimeClasspath
+      testLogging {
+         events 'passed', 'skipped', 'failed'
+      }
+   }
 }
 
 gradle.startParameter.continueOnFailure = true
 
-serenity {
-    reports = ["single-page-html"]
-
-    // // Specify the root package of any JUnit acceptance tests
-    testRoot = "starter"
-}
-
-defaultTasks 'dependencies', 'clean', 'compileJava', 'listTasks'
-
+defaultTasks 'dependencies', 'clean', 'build', 'listTasks'
 tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+   options.encoding = 'UTF-8'
 }
 
 tasks.register('deleteBuilds') {
-    doLast {
-        delete 'build'
-        delete '.gradle'
-        delete 'target'
-        // delete 'lib'
-    }
+   doLast {
+      delete 'build'
+      delete '.gradle'
+      delete 'target'
+      // delete 'lib'
+   }
 }
 tasks.register('printEnvVariables') {
-    doLast {
-        exec {
-            commandLine 'printenv'
-        }
-    }
+   doLast {
+      exec {
+         commandLine 'printenv'
+      }
+   }
 }
 
 tasks.register('printSetupVersions') {
-    doLast {
-        try {
-            exec {
-                commandLine 'java', '--version'
-                ignoreExitValue true
-                commandLine 'groovy', '--version'
-                ignoreExitValue true
-                commandLine 'mvn', '--version'
-                ignoreExitValue true
-                commandLine 'gradle', '--version'
-                ignoreExitValue true
-            }
-        } catch (ExecException e) {
-            println "One or more commands are not installed: ${e.message}"
-        }
-    }
+   doLast {
+      try {
+         exec {
+            commandLine 'java', '--version'
+            ignoreExitValue true
+            commandLine 'groovy', '--version'
+            ignoreExitValue true
+            commandLine 'mvn', '--version'
+            ignoreExitValue true
+            commandLine 'gradle', '--version'
+            ignoreExitValue true
+         }
+      } catch (ExecException e) {
+         println "One or more commands are not installed: ${e.message}"
+      }
+   }
 }
 
 tasks.register('listTasks') {
-    doLast {
-        gradleTasks()
-        genericTasks()
-    }
+   doLast {
+      gradleTasks()
+      genericTasks()
+   }
 }
 
 def gradleTasks() {
-    println "\nGradle Custom Tasks"
-    println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
-    println "\tDisplay List Custom Tasks : gradlew list"
-    println "\tCompile Java : gradlew compileJava"
+   println "\nGradle Custom Tasks"
+   println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
+   println "\tDisplay List Custom Tasks : gradlew list"
+   println "\tCompile Java : gradlew compileJava"
 }
 
 def genericTasks() {
-    println "\nGeneral Custom Tasks"
-    println "\tDisplay Local Environments   : gradlew printEnvVariables"
-    println "\tDisplay Current Versions     : gradlew printSetupVersions"
-    println "\tUpgrade Gradle Version       : gradlew --gradle-version <_._>"
-    println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
-    println "\tDisplay Gradle Default Tasks : gradlew tasks"
-    println "\tExecute Test Suites          : gradlew test"
-    println "\tDebug Argument Options       : gradlew --info|--debug|--full-stacktrace"
-    println "\tDebug Dependency Reports     : gradlew dependencyInsight --dependency <org.company.package:dependency>"
-    println "\tExecute Test Suites          : gradlew test"
-    println "\tDebug :                      : --info --debug --full-stacktrace"
+   println "\nGeneral Custom Tasks"
+   println "\tDisplay Local Environments   : gradlew printEnvVariables"
+   println "\tDisplay Current Versions     : gradlew printSetupVersions"
+   println "\tUpgrade Gradle Version       : gradlew --gradle-version <_._>"
+   println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
+   println "\tDisplay Gradle Default Tasks : gradlew task"
+   println "\tExecute Test Suites          : gradlew test"
+   println "\tDebug Argument Options       : gradlew --info|--debug|--full-stacktrace"
+   println "\tDebug Dependency Reports     : gradlew dependencyInsight --dependency <org.company.package:dependency>"
+   println "\tExecute Test Suites          : gradlew test"
+   println "\tDebug :                      : --info --debug --full-stacktrace"
 }

@@ -13,3 +13,9 @@ gradle/wrapper/dists/
 QualityAutomation.iml
 QualityAutomation.ipr
 QualityAutomation.iws
+/out/
+/.idea/
+.DS_Store
+.idea/jarRepositories.xml
+.idea/misc.xml
+.idea/modules.xml
