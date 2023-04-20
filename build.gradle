@@ -77,17 +77,19 @@ tasks {
 
    // Run the Serenity CLI task
    serenity {
-      dependsOn assemble, compileGroovy
-      doLast {
-         javaexec {
-            main = 'io.cucumber.core.cli.Main'
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--glue', 'com.company.steps', 'src/test/resources']
-         }
+      dependsOn assemble, compileGroovy, compileJava
+      doFirst {
          javaexec {
             main = "net.serenitybdd.cucumber.cli.Main"
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
             args = ['--plugin', 'pretty', '--glue', 'com.company.steps', 'src/test/resources']
+         }
+      }
+      doLast {
+         javaexec {
+            main = 'net.serenitybdd.cli.SerenityCLI'
+            classpath = configurations.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+            args = ['aggregate']
          }
       }
    }
@@ -107,6 +109,7 @@ ext {
    junitVersion = '5.9.2'
    cucumberJavaVersion = '7.11.2'
    cucumberJUnitPlatformEngineVersion = '7.11.2'
+   serenityVersion = '3.6.7'
    serenityCoreVersion = '3.3.6'
    serenityJUnit5Version = '3.6.12+'
    serenityCucumberVersion = '3.6.22'
@@ -128,6 +131,7 @@ dependencies {
    testImplementation "org.slf4j:slf4j-simple:1.7.30"
    implementation "net.serenity-bdd:serenity-core:${serenityCoreVersion}"
    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
+   implementation "net.serenity-bdd:serenity-cli:${serenityVersion}"
    implementation("net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}") {
       exclude group: 'org.seleniumhq.selenium', module: 'selenium-java'
    }
@@ -181,29 +185,8 @@ sourceSets {
    }
 }
 
-tasks {
-   // Compile and package the application code
-   assemble {
-      // ...
-   }
-
-   // Run the Serenity CLI task
-   serenity {
-      dependsOn assemble
-      doLast {
-         javaexec {
-            main = 'net.serenitybdd.cli.SerenityCLI'
-            classpath = configurations.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
-            args = ['aggregate']
-         }
-      }
-   }
-}
-
 def envProperties = new Properties()
 file("env.properties").withInputStream { envProperties.load(it) }
-
-
 
 // Test execution configuration
 test {
@@ -220,7 +203,6 @@ test {
    // Add the following lines:
    systemProperty "serenity.test.root", "src/test/resources" // Update the path if necessary
    systemProperty "serenity.requirements.directory", "src/test/resources/features" // Update the path if necessary
- 
 
    // Test logging configuration
    testLogging.showStandardStreams = true
@@ -240,7 +222,7 @@ test {
 }
 gradle.startParameter.continueOnFailure = true
 
-defaultTasks 'dependencies', 'clean', 'build', 'listTasks'
+defaultTasks 'dependencies', 'clean', 'test', '','list'
 
 tasks.register('deleteBuilds') {
    doLast {
@@ -382,7 +364,7 @@ def gradleTasks() {
    println "\nGradle Custom Tasks"
    println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
    println "\tDisplay List Custom Tasks : gradlew list"
-   println "\tCompile Java : gradlew compileJava"
+   println "\tCompile Java & Groovy : gradlew compileJava; gradlew compileGroovy"
 }
 
 def genericTasks() {
@@ -398,5 +380,3 @@ def genericTasks() {
    println "\tExecute Test Suites          : gradlew test"
    println "\tDebug :                      : --info --debug --full-stacktrace"
 }
-
-gradle.startParameter.setTaskNames(['clean', 'test', 'aggregate'])
