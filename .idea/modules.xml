@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/QualityAutomation.iml" filepath="$PROJECT_DIR$/.idea/modules/QualityAutomation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/QualityAutomation.main.iml" filepath="$PROJECT_DIR$/.idea/modules/QualityAutomation.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/src/main/QualityAutomation.src.main.iml" filepath="$PROJECT_DIR$/.idea/modules/src/main/QualityAutomation.src.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/src/main/groovy/QualityAutomation.src.main.groovy.iml" filepath="$PROJECT_DIR$/.idea/modules/src/main/groovy/QualityAutomation.src.main.groovy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/QualityAutomation.test.iml" filepath="$PROJECT_DIR$/.idea/modules/QualityAutomation.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/QualityAutomation.testFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/QualityAutomation.testFixtures.iml" />
+    </modules>
+  </component>
+</project>
