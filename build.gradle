@@ -12,7 +12,7 @@ plugins {
     id 'com.intershop.gradle.jiraconnector' version '6.3.0'
 }
 
-group   = 'com.company'
+group = 'com.company'
 version = '1.0-SNAPSHOT'
 description = 'Quality Automation'
 
@@ -20,12 +20,6 @@ import org.gradle.process.internal.ExecException
 
 sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
-
-configurations {
-    cucumberRuntime {
-        extendsFrom testImplementation
-    }
-}
 
 idea {
     module {
@@ -77,40 +71,6 @@ dependencies {
 
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
-
-    // Log4j - Logging framework
-    implementation 'org.apache.logging.log4j:log4j-api:2.13.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.13.1'
-    implementation 'org.apache.logging.log4j:log4j-slf4j18-impl:2.13.1'
-
-}
-
-dependencies {
-    testImplementation 'junit:junit:4.13.1'
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
-    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
-    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
-
-    // Serenity and Cucumber integration for testing
-    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
-    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
-    implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
-
-    testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
-
-    // For using WinAppDriver
-    // Appium Java client
-    implementation 'io.appium:java-client:7.6.0'
-
-    // Selenium WebDriver
-    testImplementation 'org.seleniumhq.selenium:selenium-java:${seleniumVersion}'
-    // Groovy
-    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
-    implementation 'org.codehaus.groovy:groovy-all:2.4.15'
-
-    // Test dependencies
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
-
 }
 
 sourceSets {
@@ -138,8 +98,6 @@ publishing {
 compileJava {
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
-
-defaultTasks 'dependencies', 'clean', 'build', 'listTasks'
 
 test {
     include '**/*Test.class', '**/*IT.class', 'com/company/runner/TestSuiteRunner.class'
@@ -172,7 +130,7 @@ serenity {
     reports = ["single-page-html"]
 
     // // Specify the root package of any JUnit acceptance tests
-    testRoot="starter"
+    testRoot = "starter"
 }
 
 defaultTasks 'dependencies', 'clean', 'compileJava', 'listTasks'
@@ -187,6 +145,7 @@ tasks.register('deleteBuilds') {
         delete '.gradle'
         delete 'target'
         // delete 'lib'
+    }
 }
 tasks.register('printEnvVariables') {
     doLast {
