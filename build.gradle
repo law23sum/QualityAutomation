@@ -24,7 +24,7 @@ plugins {
    id 'eclipse'
    id 'java-test-fixtures'
    id 'maven-publish'  // handle publishing artifacts to Maven repo
-   // experiment
+   // Experimenting with plugins
    id 'com.jfrog.bintray' version '1.8.5'
    id 'com.intershop.gradle.jiraconnector' version '6.3.0'
 }
@@ -35,7 +35,6 @@ description = 'Quality Automation'
 
 import org.gradle.process.internal.ExecException
 import au.com.bytecode.opencsv.CSVReader
-
 
 sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
@@ -69,41 +68,7 @@ configurations {
    }
 }
 
-tasks {
-   // Compile and package the application code
-   assemble {
-      // ...
-   }
 
-   // Run the Serenity CLI task
-   serenity {
-      dependsOn assemble, compileGroovy, compileJava
-      doFirst {
-         javaexec {
-            main = "net.serenitybdd.cucumber.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.company.steps', 'src/test/resources']
-         }
-      }
-      doLast {
-         javaexec {
-            main = 'net.serenitybdd.cli.SerenityCLI'
-            classpath = configurations.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
-            args = ['aggregate']
-         }
-      }
-   }
-}
-
-configurations.configureEach {
-   resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-   resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
-   resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-      if (details.requested.group == 'org.codehaus.groovy' && details.requested.name == 'groovy') {
-         details.useVersion '3.0.16'
-      }
-   }
-}
 
 ext {
    junitVersion = '5.9.2'
@@ -220,9 +185,46 @@ test {
    }
    // Experimentation
 }
+
 gradle.startParameter.continueOnFailure = true
 
 defaultTasks 'dependencies', 'clean', 'test', '','list'
+
+tasks {
+   // Compile and package the application code
+   assemble {
+      // ...
+   }
+
+   // Run the Serenity CLI task
+   serenity {
+      dependsOn assemble, compileGroovy, compileJava
+      doFirst {
+         javaexec {
+            main = "net.serenitybdd.cucumber.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty', '--glue', 'com.company.steps', 'src/test/resources']
+         }
+      }
+      doLast {
+         javaexec {
+            main = 'net.serenitybdd.cli.SerenityCLI'
+            classpath = configurations.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+            args = ['aggregate']
+         }
+      }
+   }
+}
+
+configurations.configureEach {
+   resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+   resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+   resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+      if (details.requested.group == 'org.codehaus.groovy' && details.requested.name == 'groovy') {
+         details.useVersion '3.0.16'
+      }
+   }
+}
 
 tasks.register('deleteBuilds') {
    doLast {
@@ -259,7 +261,7 @@ tasks.register('verifyEnvironment') {
       }
    }
 }
-tasks.register('Lists') {
+tasks.register('list') {
    doLast {
       gradleTasks()
       genericTasks()
