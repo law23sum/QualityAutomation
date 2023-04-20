@@ -1,4 +1,7 @@
-
+./gradlew test -Pcucumber.tags="@yourTag" -Pwebdriver.base.url="http://your-url.com"
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
 group = 'com.company'
 version = '0.0.1'
 sourceCompatibility = 17
@@ -75,7 +78,7 @@ task cucumber {
     dependsOn testClasses
     doLast {
         javaexec {
-        }
+         }
     }
 }
 
@@ -97,21 +100,4 @@ task deleteBuilds {
 def systemPropertiesSettings() {
     exec {
         commandLine 'export', 'CUCUMBER_PUBLISH_ENABLED=true'
-    }
-}
-
-def gradleTasks() {
-    println "\nGradle Custom Tasks"
-    println "\tInitial : gradle --full-stacktrace --scan; alias gradlew=\"./gradlew\""
-    println "\tDisplay List Custom Tasks : gradlew list"
-    println "\tCompile Java : gradlew compileJava"
-}
-
-def genericTasks() {
-    println "\nGeneral Custom Tasks"
-    println "\tDisplay Local Environments : gradlew printEnvVariables"
-    println "\tDisplay Current Versions : gradlew printSetupVersions"
-    println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
-    println "\tExecute Test Suites : gradlew test"
-    println "\tDebug : --scan --info --debug --full-stacktrace"
-}
+    }}

@@ -1,2 +1,1 @@
-include 'src:main:groovy'
-findProject(':src:main:groovy')?.name = 'groovy'
+rootProject.name = 'QualityAutomation'
