@@ -15,6 +15,6 @@
                  Enter into the terminal       =>     gradle : gradle list
                  Update version                =>     gradle : ctrl + shift + F = gradle-<version>
             Test
-                 <Details>
+                 Insert args per attribute     =>     gradle :
            Report
                  <Details>

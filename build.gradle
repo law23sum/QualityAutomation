@@ -1,73 +1,221 @@
+<<<<<<< HEAD
+=======
 import org.gradle.process.internal.ExecException
+>>>>>>> master
 plugins {
+    id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
     id 'java'
+    id 'org.gradle.java-library'
     id 'groovy'
     id 'idea'
     id 'eclipse'
     id 'java-test-fixtures'
-    id 'maven-publish'  // Add the maven-publish plugin to handle publishing artifacts to a Maven repository
+    id 'maven-publish'  // handle publishing artifacts to Maven repo
+    // experiment
+    id 'com.jfrog.bintray' version '1.8.5'
+    id 'com.intershop.gradle.jiraconnector' version '6.3.0'
 }
 
 group   = 'com.company'
 version = '1.0-SNAPSHOT'
+<<<<<<< HEAD
+description 'Quality Automation'
+=======
+description = 'Quality Automation'
+>>>>>>> master
+import org.gradle.process.internal.ExecException
 
-sourceCompatibility = 17
-targetCompatibility = 17
+sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
+targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> master
 
 repositories {
     mavenCentral()
+    google()
 }
 
 ext {
-    junitVersion = '5.8.2'
+    junitVersion = '5.9.2'
     cucumberJavaVersion = '7.11.2'
     cucumberJUnitPlatformEngineVersion = '7.11.2'
     serenityCoreVersion = '3.3.6'
     serenityJUnit5Version = '3.3.6'
     serenityCucumberVersion = '3.6.22'
     groovyMavenPluginVersion = '1.5'
+    slf4jApiVersion = '2.0.7'
+    restAssuredVersion = '5.3.0'
+    seleniumVersion = '4.8.1'
 }
 
 dependencies {
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testImplementation 'junit:junit:4.13.1'
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
     testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
-    implementation "net.serenity-bdd:serenity-core:${serenityCoreVersion}"
+
+    // Serenity and Cucumber integration for testing
+    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
+    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
     implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
-    implementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
+
+    testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
+
+    // For using WinAppDriver
+    // Appium Java client
+    implementation 'io.appium:java-client:7.6.0'
+
+    // Selenium WebDriver
+    testImplementation 'org.seleniumhq.selenium:selenium-java:${seleniumVersion}'
+    // Groovy
     implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
+<<<<<<< HEAD
+    implementation 'org.codehaus.groovy:groovy-all:2.4.15'
+=======
+>>>>>>> master
 
-    // Other dependencies (commented out)
-    /*
-    // Selenium WebDriver - Browser automation framework
-    implementation 'org.seleniumhq.selenium:selenium-java:4.8.1'
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
 
-    // Appium - Mobile automation framework
-    testImplementation 'io.appium:java-client:7.3.0'
+}
 
+<<<<<<< HEAD
+=======
     // Log4j - Logging framework
     implementation 'org.apache.logging.log4j:log4j-api:2.13.1'
     implementation 'org.apache.logging.log4j:log4j-core:2.13.1'
     implementation 'org.apache.logging.log4j:log4j-slf4j18-impl:2.13.1'
     */
+
 }
 
+dependencies {
+    testImplementation 'junit:junit:4.13.1'
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
+
+    // Serenity and Cucumber integration for testing
+    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
+    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
+    implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
+
+    testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
+
+    // For using WinAppDriver
+    // Appium Java client
+    implementation 'io.appium:java-client:7.6.0'
+
+    // Selenium WebDriver
+    testImplementation 'org.seleniumhq.selenium:selenium-java:${seleniumVersion}'
+    // Groovy
+    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
+    implementation 'org.codehaus.groovy:groovy-all:2.4.15'
+
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+
+}
+
+>>>>>>> master
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+    }
+
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+    }
+}
+
+<<<<<<< HEAD
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+compileJava {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+=======
 
 defaultTasks 'dependencies', 'clean', 'build', 'listTasks'
+>>>>>>> master
 
-compileJava { options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" }
+test {
+    include '**/*Test.class', '**/*IT.class', 'com/company/runner/TestSuiteRunner.class'
+    doFirst {
+        // Configure the test execution using the JUnit Platform
+        useJUnitPlatform()
+        systemProperties System.getProperties()
 
-//tasks.withType(Test).configureEach {
-//    systemProperty "cucumber.options", project.hasProperty("cucumber.options") ? project.getProperty("cucumber.options") : ""
-//}
+        systemProperty("cucumber.junit-platform.naming-strategy", "long")
+        systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
+        systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
+        systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
+
+        // Move more properties to build.gradle
+        systemProperty "serenity.outputDirectory", project.findProperty("serenity.outputDirectory") ?: "target/site/serenity"
+        systemProperty "serenity.project.name", project.findProperty("serenity.project.name") ?: "Your Project Name"
+
+        testLogging.showStandardStreams = true
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+        testLogging {
+            events 'passed', 'skipped', 'failed'
+        }
+    }
+}
+
+gradle.startParameter.continueOnFailure = true
+
+serenity {
+    reports = ["single-page-html"]
+
+    // // Specify the root package of any JUnit acceptance tests
+    testRoot="starter"
+}
+
+defaultTasks 'dependencies', 'clean', 'compileJava', 'listTasks'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+>>>>>>> Stashed changes
 
 tasks.register('deleteBuilds') {
     doLast {
         delete 'build'
         delete '.gradle'
+<<<<<<< HEAD
+        delete 'target'
+        // delete 'lib'
+=======
         delete 'lib'
         delete 'target'
+>>>>>>> master
     }
 }
 tasks.register('printEnvVariables') {
@@ -104,6 +252,11 @@ tasks.register('listTasks') {
     }
 }
 
+<<<<<<< HEAD
+def gradleWrapperVersion = findProperty('gradleWrapperVersion') ?: properties['gradleWrapperVersion']
+
+=======
+>>>>>>> master
 def gradleTasks() {
     println "\nGradle Custom Tasks"
     println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
@@ -113,9 +266,17 @@ def gradleTasks() {
 
 def genericTasks() {
     println "\nGeneral Custom Tasks"
-    println "\tDisplay Local Environments : gradlew printEnvVariables"
-    println "\tDisplay Current Versions : gradlew printSetupVersions"
+    println "\tDisplay Local Environments   : gradlew printEnvVariables"
+    println "\tDisplay Current Versions     : gradlew printSetupVersions"
+    println "\tUpgrade Gradle Version       : gradlew --gradle-version <_._>"
     println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
+<<<<<<< HEAD
+    println "\tDisplay Gradle Default Tasks : gradlew tasks"
+    println "\tExecute Test Suites          : gradlew test"
+    println "\tDebug Argument Options       : gradlew --info|--debug|--full-stacktrace"
+    println "\tDebug Dependency Reports     : gradlew dependencyInsight --dependency <org.company.package:dependency>"
+=======
     println "\tExecute Test Suites : gradlew test"
     println "\tDebug :  --info --debug --full-stacktrace"
+>>>>>>> master
 }
