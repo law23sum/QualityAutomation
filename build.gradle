@@ -1,6 +1,7 @@
 plugins {
     id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
     id 'java'
+    id 'org.gradle.java-library'
     id 'groovy'
     id 'idea'
     id 'eclipse'
@@ -8,13 +9,13 @@ plugins {
     id 'maven-publish'  // handle publishing artifacts to Maven repo
     // experiment
     id 'com.jfrog.bintray' version '1.8.5'
+    id 'com.intershop.gradle.jiraconnector' version '6.3.0'
 }
 
 group   = 'com.company'
 version = '1.0-SNAPSHOT'
-
+description 'Quality Automation'
 import org.gradle.process.internal.ExecException
-import org.gradle.util.GradleVersion
 
 sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
@@ -34,48 +35,62 @@ idea {
 
 repositories {
     mavenCentral()
+    google()
 }
 
 ext {
-    junitVersion = '5.8.2'
-    cucumberJavaVersion = '7.4.1'
+    junitVersion = '5.9.2'
+    cucumberJavaVersion = '7.11.2'
     cucumberJUnitPlatformEngineVersion = '7.11.2'
     serenityCoreVersion = '3.3.6'
     serenityJUnit5Version = '3.3.6'
-    serenityCucumberVersion = '3.3.22'
+    serenityCucumberVersion = '3.6.22'
     groovyMavenPluginVersion = '1.5'
     slf4jApiVersion = '2.0.7'
+    restAssuredVersion = '5.3.0'
+    seleniumVersion = '4.8.1'
 }
 
 dependencies {
-    // Core dependencies for production code
-    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
-
-    // Test dependencies
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testImplementation 'junit:junit:4.13.1'
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
     testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
 
-//    // Serenity and Cucumber integration for testing
-//    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
+    // Serenity and Cucumber integration for testing
+    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
     testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
     implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
 
-    // Serenity Core Dependencies (plusible removal of Junit if Cucumber Can
-    /*
-    implementation "net.serenity-bdd:serenity-core:${serenityCoreVersion}"
-    implementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
-    */
-    // Other dependencies (commented out)
-    /*
-    // Selenium WebDriver - Browser automation framework
-    implementation 'org.seleniumhq.selenium:selenium-java:4.8.1'
+    testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
 
-    // Appium - Mobile automation framework
-    testImplementation 'io.appium:java-client:7.3.0'
-    */
+    // For using WinAppDriver
+    // Appium Java client
+    implementation 'io.appium:java-client:7.6.0'
+
+    // Selenium WebDriver
+    testImplementation 'org.seleniumhq.selenium:selenium-java:${seleniumVersion}'
+    // Groovy
+    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
+    implementation 'org.codehaus.groovy:groovy-all:2.4.15'
+
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+    }
+
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+    }
 }
 
 publishing {
@@ -91,29 +106,37 @@ compileJava {
 }
 
 test {
+    include '**/*Test.class', '**/*IT.class', 'com/company/runner/TestSuiteRunner.class'
     doFirst {
         // Configure the test execution using the JUnit Platform
         useJUnitPlatform()
+        systemProperties System.getProperties()
+
         systemProperty("cucumber.junit-platform.naming-strategy", "long")
         systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
         systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
         systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
+
+        // Move more properties to build.gradle
+        systemProperty "serenity.outputDirectory", project.findProperty("serenity.outputDirectory") ?: "target/site/serenity"
+        systemProperty "serenity.project.name", project.findProperty("serenity.project.name") ?: "Your Project Name"
+
+        testLogging.showStandardStreams = true
         testClassesDirs = sourceSets.test.output.classesDirs
         classpath = sourceSets.test.runtimeClasspath
-        include 'com/company/runner/TestSuiteRunner.class'
         testLogging {
             events 'passed', 'skipped', 'failed'
         }
     }
+}
 
-    doLast {
-        // Execute Cucumber tests
-        javaexec {
-            main = "io.cucumber.core.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--glue', 'com.company.steps', '--plugin', 'pretty', '--plugin', 'json:build/reports/cucumber/cucumber.json', 'src/test/resources/features']
-        }
-    }
+gradle.startParameter.continueOnFailure = true
+
+serenity {
+    reports = ["single-page-html"]
+
+    // // Specify the root package of any JUnit acceptance tests
+    testRoot="starter"
 }
 
 defaultTasks 'dependencies', 'clean', 'compileJava', 'listTasks'

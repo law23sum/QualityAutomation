@@ -1,6 +1,7 @@
 .idea/
 lib/
 /target/
+<<<<<<< Updated upstream
 /build/
 /.gradle/
 /.idea/
