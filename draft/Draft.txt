@@ -1,2 +1,22 @@
 gradlew test aggregate
 gradlew test -Pcucumber.features="path/to/your/features" -Pcucumber.glue="com.example.stepdefs"
+
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDirs = ['src/main/resources', 'src/main/groovy-resources']
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+        resources {
+            srcDirs = ['src/test/resources', 'src/test/groovy-resources']
+        }
+    }
+}

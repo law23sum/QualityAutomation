@@ -113,16 +113,40 @@ dependencies {
    testImplementation 'org.hamcrest:hamcrest:2.2'
 }
 
-
 sourceSets {
    main {
       java {
          srcDir 'src/main/java'
       }
+      resources {
+         srcDirs = ['src/main/resources', 'src/main/groovy-resources']
+      }
    }
    test {
       java {
          srcDir 'src/test/java'
+      }
+      resources {
+         srcDirs = ['src/test/resources', 'src/test/groovy-resources']
+      }
+   }
+}
+
+tasks {
+   // Compile and package the application code
+   assemble {
+      // ...
+   }
+
+   // Run the Serenity CLI task
+   serenity {
+      dependsOn assemble
+      doLast {
+         javaexec {
+            main = 'net.serenitybdd.cli.SerenityCLI'
+            classpath = configurations.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+            args = ['aggregate']
+         }
       }
    }
 }
@@ -147,6 +171,13 @@ test {
    classpath = sourceSets.test.runtimeClasspath
    testLogging {
       events 'passed', 'skipped', 'failed'
+   }
+
+   def selectedEnv = project.findProperty('selectedEnv') ?: 'default'
+   envProperties.entrySet().each { entry ->
+      if (entry.key.startsWith("$selectedEnv.")) {
+         systemProperty entry.key - "$selectedEnv.", entry.value
+      }
    }
 }
 
@@ -192,6 +223,26 @@ tasks.register('printSetupVersions') {
    }
 }
 
+tasks.register('verifyEnvironment') {
+   doLast {
+      println 'Verifying environment setup...'
+      exec {
+         commandLine 'java', '-version'
+         ignoreExitValue true
+      }
+      exec {
+         commandLine 'groovy', '-version'
+         ignoreExitValue true
+      }
+      exec {
+         commandLine 'gradle', '-version'
+         ignoreExitValue true
+      }
+   }
+}
+
+
+
 tasks.register('listTasks') {
    doLast {
       gradleTasks()
@@ -224,3 +275,5 @@ def genericTasks() {
    println "\tExecute Test Suites          : gradlew test"
    println "\tDebug :                      : --info --debug --full-stacktrace"
 }
+
+gradle.startParameter.setTaskNames(['clean', 'test', 'aggregate'])
