@@ -127,29 +127,8 @@ sourceSets {
    }
 }
 
-publishing {
-   publications {
-      mavenJava(MavenPublication) {
-         from components.java
-      }
-   }
-   repositories {
-      maven {
-         url = uri(project.properties['mavenRepositoryUrl'])
-         credentials {
-            username = project.properties['mavenRepositoryUsername']
-            password = project.properties['mavenRepositoryPassword']
-         }
-      }
-   }
-}
-
-// Create a signAndPublish task
-task signAndPublish(dependsOn: 'publish') {
-   doLast {
-      println 'Signing and publishing artifacts...'
-   }
-}
+def envProperties = new Properties()
+file("env.properties").withInputStream { envProperties.load(it) }
 
 // Test execution configuration
 test {
