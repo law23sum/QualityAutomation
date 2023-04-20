@@ -1,0 +1,14 @@
+.idea/
+lib/
+/target/
+/build/
+/.gradle/
+/.idea/
+gradle/caches/
+gradle/daemon/
+gradle/jdks/
+gradle/native/
+gradle/wrapper/dists/
+QualityAutomation.iml
+QualityAutomation.ipr
+QualityAutomation.iws
