@@ -4,6 +4,7 @@ lib/
 /build/
 /.gradle/
 /.idea/
+gradle/.DS_Store
 gradle/caches/
 gradle/daemon/
 gradle/jdks/

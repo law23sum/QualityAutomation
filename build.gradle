@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-import org.gradle.process.internal.ExecException
->>>>>>> master
 plugins {
     id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
     id 'java'
@@ -18,11 +14,8 @@ plugins {
 
 group   = 'com.company'
 version = '1.0-SNAPSHOT'
-<<<<<<< HEAD
-description 'Quality Automation'
-=======
 description = 'Quality Automation'
->>>>>>> master
+
 import org.gradle.process.internal.ExecException
 
 sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
@@ -40,10 +33,6 @@ idea {
         downloadSources = true
     }
 }
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> master
 
 repositories {
     mavenCentral()
@@ -84,23 +73,15 @@ dependencies {
     testImplementation 'org.seleniumhq.selenium:selenium-java:${seleniumVersion}'
     // Groovy
     implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
-<<<<<<< HEAD
     implementation 'org.codehaus.groovy:groovy-all:2.4.15'
-=======
->>>>>>> master
 
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
 
-}
-
-<<<<<<< HEAD
-=======
     // Log4j - Logging framework
     implementation 'org.apache.logging.log4j:log4j-api:2.13.1'
     implementation 'org.apache.logging.log4j:log4j-core:2.13.1'
     implementation 'org.apache.logging.log4j:log4j-slf4j18-impl:2.13.1'
-    */
 
 }
 
@@ -132,7 +113,6 @@ dependencies {
 
 }
 
->>>>>>> master
 sourceSets {
     main {
         java {
@@ -147,7 +127,6 @@ sourceSets {
     }
 }
 
-<<<<<<< HEAD
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -159,10 +138,8 @@ publishing {
 compileJava {
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
-=======
 
 defaultTasks 'dependencies', 'clean', 'build', 'listTasks'
->>>>>>> master
 
 test {
     include '**/*Test.class', '**/*IT.class', 'com/company/runner/TestSuiteRunner.class'
@@ -203,20 +180,13 @@ defaultTasks 'dependencies', 'clean', 'compileJava', 'listTasks'
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
->>>>>>> Stashed changes
 
 tasks.register('deleteBuilds') {
     doLast {
         delete 'build'
         delete '.gradle'
-<<<<<<< HEAD
         delete 'target'
         // delete 'lib'
-=======
-        delete 'lib'
-        delete 'target'
->>>>>>> master
-    }
 }
 tasks.register('printEnvVariables') {
     doLast {
@@ -252,11 +222,6 @@ tasks.register('listTasks') {
     }
 }
 
-<<<<<<< HEAD
-def gradleWrapperVersion = findProperty('gradleWrapperVersion') ?: properties['gradleWrapperVersion']
-
-=======
->>>>>>> master
 def gradleTasks() {
     println "\nGradle Custom Tasks"
     println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
@@ -270,13 +235,10 @@ def genericTasks() {
     println "\tDisplay Current Versions     : gradlew printSetupVersions"
     println "\tUpgrade Gradle Version       : gradlew --gradle-version <_._>"
     println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
-<<<<<<< HEAD
     println "\tDisplay Gradle Default Tasks : gradlew tasks"
     println "\tExecute Test Suites          : gradlew test"
     println "\tDebug Argument Options       : gradlew --info|--debug|--full-stacktrace"
     println "\tDebug Dependency Reports     : gradlew dependencyInsight --dependency <org.company.package:dependency>"
-=======
-    println "\tExecute Test Suites : gradlew test"
-    println "\tDebug :  --info --debug --full-stacktrace"
->>>>>>> master
+    println "\tExecute Test Suites          : gradlew test"
+    println "\tDebug :                      : --info --debug --full-stacktrace"
 }
