@@ -15,6 +15,7 @@
  */
 
 plugins {
+   id 'net.serenity-bdd.aggregator' version '3.5.0'
    id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
    id 'java'
    id 'org.gradle.java-library'
@@ -63,6 +64,8 @@ configurations.all {
    }
 }
 
+
+
 ext {
    junitVersion = '5.9.2'
    cucumberJavaVersion = '7.11.2'
@@ -90,6 +93,7 @@ dependencies {
       exclude group: 'org.seleniumhq.selenium', module: 'selenium-java'
    }
 
+   // REST Assured
    testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
 
    // For using WinAppDriver
@@ -104,6 +108,9 @@ dependencies {
 
    // Test dependencies
    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+
+   // Experiment=
+   testImplementation 'org.hamcrest:hamcrest:2.2'
 }
 
 
@@ -120,40 +127,30 @@ sourceSets {
    }
 }
 
-publishing {
-   publications {
-      mavenJava(MavenPublication) {
-         from components.java
-      }
-   }
-}
-
-compileJava {
-   options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-}
+def envProperties = new Properties()
+file("env.properties").withInputStream { envProperties.load(it) }
 
 // Test execution configuration
 test {
-   include 'Test.class', 'IT.class', 'com/company/runner/TestSuiteRunner.class'
-   doFirst {
-// Configure the test execution using the JUnit Platform
-      useJUnitPlatform()
-      systemProperties System.getProperties()
-      // Configure Cucumber and Serenity
-      systemProperty("cucumber.junit-platform.naming-strategy", "long")
-      systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
-      systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
-      systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
-      systemProperty "serenity.outputDirectory", project.findProperty("serenity.outputDirectory") ?: "target/site/serenity"
-      systemProperty "serenity.project.name", project.findProperty("serenity.project.name") ?: "Your Project Name"
+   useJUnitPlatform()
+   systemProperties System.getProperties()
+   systemProperty("cucumber.junit-platform.naming-strategy", "long")
+   systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
+   systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
+   systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
+   systemProperty "serenity.outputDirectory", project.findProperty("serenity.outputDirectory") ?: "target/site"
+   systemProperty "serenity.project.name", project.findProperty("serenity.project.name") ?: "Quality Automation"
 
-      // Test logging configuration
-      testLogging.showStandardStreams = true
-      testClassesDirs = sourceSets.test.output.classesDirs
-      classpath = sourceSets.test.runtimeClasspath
-      testLogging {
-         events 'passed', 'skipped', 'failed'
-      }
+   // Add the following lines:
+   systemProperty "serenity.test.root", "src/test/resources" // Update the path if necessary
+   systemProperty "serenity.requirements.directory", "src/test/resources/features" // Update the path if necessary
+
+   // Test logging configuration
+   testLogging.showStandardStreams = true
+   testClassesDirs = sourceSets.test.output.classesDirs
+   classpath = sourceSets.test.runtimeClasspath
+   testLogging {
+      events 'passed', 'skipped', 'failed'
    }
 }
 
@@ -205,6 +202,11 @@ tasks.register('listTasks') {
       genericTasks()
    }
 }
+
+// Define jiraConnector extension
+ext.jiraConnector = [
+   qualityAutomation: "Your JIRA Connector Configuration"
+]
 
 def gradleTasks() {
    println "\nGradle Custom Tasks"
