@@ -1,4 +1,3 @@
-
 Apply Serenity BDD Gradle Plugin, Java, Groovy, IDEA, Eclipse, java-test-fixtures, and Maven Publish plugins - Applies various plugins to the Gradle project, such as the Serenity BDD Gradle Plugin for generating reports, and plugins for Java, Groovy, IDEA, Eclipse, java-test-fixtures, and Maven Publish to support development, testing, and publishing of the project.
 Set group and version for the project - Sets the group and version of the project for identification and dependency management purposes.
 Set source and target compatibility based on the 'javaVersion' property - Sets the source and target compatibility of the project based on the 'javaVersion' property, which is defined elsewhere in the Gradle configuration.
@@ -15,9 +14,7 @@ Set the encoding for JavaCompile tasks - Sets the encoding for JavaCompile tasks
 Set the default tasks for the project - Sets the default tasks for the project to execute when no tasks are specified, such as listing dependencies, cleaning the build directory, compiling Java, and listing available tasks.
 
 
-
 alias gradlew="./gradlew"
 gradlew test -Pcucumber.namingStrategy="long" -Pcucumber.features="path/to/your/feature/files" -Pcucumber.tags="@your-tag" -Pwebdriver.baseUrl="http://your-base-url"
 gradlew assemble buildDependents
 gradlew test aggregate
-git push origin my-feature-branch:my-feature-branch
