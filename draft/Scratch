@@ -15,7 +15,7 @@
  */
 
 plugins {
-//   id 'net.serenity-bdd.aggregator' version '3.5.0'
+   id 'net.serenity-bdd.aggregator' version '3.5.0'
    id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
    id 'java'
    id 'org.gradle.java-library'
@@ -82,12 +82,12 @@ tasks {
          javaexec {
             main = 'io.cucumber.core.cli.Main'
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--glue', 'com.company.steps', 'src/test/resources']
+            args = ['--plugin', 'pretty', '--glue', 'com.company.steps', 'src/test/resources']
          }
          javaexec {
             main = "net.serenitybdd.cucumber.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.company.steps', 'src/test/resources']
+            classpath = configumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = [rc/test/resources']
          }
       }
    }
@@ -220,7 +220,7 @@ test {
    // Add the following lines:
    systemProperty "serenity.test.root", "src/test/resources" // Update the path if necessary
    systemProperty "serenity.requirements.directory", "src/test/resources/features" // Update the path if necessary
- 
+
 
    // Test logging configuration
    testLogging.showStandardStreams = true
@@ -240,7 +240,7 @@ test {
 }
 gradle.startParameter.continueOnFailure = true
 
-defaultTasks 'dependencies', 'clean', 'build', 'listTasks'
+defaultTasks 'dependencies', 'clean', 'build', 'Lists
 
 tasks.register('deleteBuilds') {
    doLast {
@@ -398,5 +398,3 @@ def genericTasks() {
    println "\tExecute Test Suites          : gradlew test"
    println "\tDebug :                      : --info --debug --full-stacktrace"
 }
-
-gradle.startParameter.setTaskNames(['clean', 'test', 'aggregate'])
