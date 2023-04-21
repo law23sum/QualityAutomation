@@ -47,11 +47,11 @@ project-root/
 │   │   │   ├── com/
 │   │   │   │   ├── company/
 │   │   │   │   │   ├── runners/
-│   │   │   │   │   │   ├── TestRunner.java
-│   │   │   │   │   │   ├── WebAppTestRunner.java
-│   │   │   │   │   │   ├── MobileWebTestRunner.java
-│   │   │   │   │   │   ├── DesktopTestRunner.java
-│   │   │   │   │   │   ├── EmulatorTestRunner.java
+│   │   │   │   │   │   ├── AllTestRunner.java
+│   │   │   │   │   │   ├── Domain0TestRunner.java
+│   │   │   │   │   │   ├── Domain1TestRunner.java
+│   │   │   │   │   │   ├── Domain2TestRunner.java
+│   │   │   │   │   │   ├── Domain3TestRunner.java
 │   │   │   │   │   │   └── MainframeTestRunner.java
 │   │   │   │   │   ├── steps/
 │   │   │   │   │   │   ├── common/

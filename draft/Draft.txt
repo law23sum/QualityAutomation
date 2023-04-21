@@ -7,13 +7,13 @@ gradlew test -Pcucumber.features="src/test/resources/features/WebAppsScenariosSp
 
 gradlew clean compileJava test
 -Pcucumber.glue="com.company.steps"
--Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature"
 -Pcucumber.tags="@tag1 or @tag2"
 -Pcucumber.options="--plugin json:target/cucumber-report.json"
 -PmaxParallelForks=4
 --PselectedEnv=staging
 --info or --debug or --quiet or --warn
 --tests "com.company.tests.SomeTestClass"
+webdriver.start.maximized = true
 
 
 https://docs.getxray.app/display/XRAY/Integration+with+eazyBI

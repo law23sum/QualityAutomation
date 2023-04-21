@@ -9,5 +9,5 @@ Feature: Web Apps Scenarios
     * the user performs some action
 
   @E2E
-  Scenario: Validation
+  Scenario: Validate
     * the user should see the expected result

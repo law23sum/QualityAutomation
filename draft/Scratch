@@ -1,400 +1,43 @@
-/***
- This `build.gradle` file is organized into the following sections:
 
- 1. Plugins: Define the plugins required for the project.
- 2. Basic project information: Set the project's group, version, and description.
- 3. Java source and target compatibility: Configure the Java version.
- 4. IDEA project configuration: Configure the IntelliJ IDEA project settings.
- 5. Repositories: Define the repositories for fetching dependencies.
- 6. External dependency versions: Set the versions for external dependencies.
- 7. Dependencies: Define the project dependencies.
- 8. Source sets configuration: Configure the source sets for the project.
- 9. Maven publishing configuration: Configure the Maven publishing settings.
- 10. Compiler options: Set the Java compiler options.
- 11. Test execution configuration: Configure
- */
+// Add your other build.gradle configurations and dependencies here
 
-plugins {
-   id 'net.serenity-bdd.aggregator' version '3.5.0'
-   id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0'
-   id 'java'
-   id 'org.gradle.java-library'
-   id 'groovy'
-   id 'idea'
-   id 'eclipse'
-   id 'java-test-fixtures'
-   id 'maven-publish'  // handle publishing artifacts to Maven repo
-   // experiment
-   id 'com.jfrog.bintray' version '1.8.5'
-   id 'com.intershop.gradle.jiraconnector' version '6.3.0'
-}
-
-group = 'com.company'
-version = '1.0-SNAPSHOT'
-description = 'Quality Automation'
-
-import org.gradle.process.internal.ExecException
-import au.com.bytecode.opencsv.CSVReader
-
-
-sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
-targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
-
-jar {
-   archiveBaseName = 'QualityAutomation'
-   archiveVersion =  '0.0.1'
-}
-
-idea {
-   module {
-      downloadJavadoc = true
-      downloadSources = true
-   }
-}
-
-repositories {
-   mavenCentral()
-   google()
-}
-
-configurations {
-   cucumberRuntime {
-      extendsFrom testImplementation
-   }
-}
-
-configurations {
-   runtimeClasspath {
-      extendsFrom testImplementation
-   }
-}
-
-tasks {
-   // Compile and package the application code
-   assemble {
-      // ...
-   }
-
-   // Run the Serenity CLI task
-   serenity {
-      dependsOn assemble, compileGroovy
-      doLast {
-         javaexec {
-            main = 'io.cucumber.core.cli.Main'
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.company.steps', 'src/test/resources']
-         }
-         javaexec {
-            main = "net.serenitybdd.cucumber.cli.Main"
-            classpath = configumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = [rc/test/resources']
-         }
-      }
-   }
-}
-
-configurations.configureEach {
-   resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-   resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
-   resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-      if (details.requested.group == 'org.codehaus.groovy' && details.requested.name == 'groovy') {
-         details.useVersion '3.0.16'
-      }
-   }
-}
-
-ext {
-   junitVersion = '5.9.2'
-   cucumberJavaVersion = '7.11.2'
-   cucumberJUnitPlatformEngineVersion = '7.11.2'
-   serenityCoreVersion = '3.3.6'
-   serenityJUnit5Version = '3.6.12+'
-   serenityCucumberVersion = '3.6.22'
-   groovyMavenPluginVersion = '1.5'
-   slf4jApiVersion = '2.0.7'
-   restAssuredVersion = '5.3.0'
-   seleniumVersion = '4.8.1'
-}
-
-dependencies {
-   // JUnit 4 for backward compatible + JUnit 5
-   testImplementation 'junit:junit:4.13.1'
-   testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
-   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
-   testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
-   testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
-
-   // Serenity and Cucumber integration for testing
-   testImplementation "org.slf4j:slf4j-simple:1.7.30"
-   implementation "net.serenity-bdd:serenity-core:${serenityCoreVersion}"
-   testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
-   implementation("net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}") {
-      exclude group: 'org.seleniumhq.selenium', module: 'selenium-java'
-   }
-
-   // REST Assured
-   testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
-
-   // For using WinAppDriver
-   // Appium Java client
-   implementation 'io.appium:java-client:8.3.0'
-
-   // Selenium WebDriver
-   testImplementation "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
-   // Groovy
-   implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
-   implementation 'org.codehaus.groovy:groovy-all:2.4.15'
-
-   // Test dependencies
-   testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
-
-   // Experiment=
-   testImplementation 'org.hamcrest:hamcrest:2.2'
-   testImplementation 'app.getxray:xray-junit-extensions:0.6.1'
-   implementation 'com.opencsv:opencsv:5.7.0'
-}
-
-tasks.withType(JavaCompile).configureEach {
-   options.encoding = 'UTF-8'
-}
-
-tasks.withType(GroovyCompile).configureEach {
-   groovyOptions.encoding = 'UTF-8'
-}
-
-sourceSets {
-   main {
-      java {
-         srcDir 'src/main/java'
-      }
-      resources {
-         srcDirs = ['src/main/resources', 'src/main/groovy-resources']
-      }
-   }
-   test {
-      java {
-         srcDir 'src/test/java'
-      }
-      resources {
-         srcDirs = ['src/test/resources', 'src/test/groovy-resources']
-      }
-   }
-}
-
-tasks {
-   // Compile and package the application code
-   assemble {
-      // ...
-   }
-
-   // Run the Serenity CLI task
-   serenity {
-      dependsOn assemble
-      doLast {
-         javaexec {
-            main = 'net.serenitybdd.cli.SerenityCLI'
-            classpath = configurations.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
-            args = ['aggregate']
-         }
-      }
-   }
-}
-
-def envProperties = new Properties()
-file("env.properties").withInputStream { envProperties.load(it) }
-
-
-
-// Test execution configuration
-test {
-   useJUnitPlatform()
-   systemProperties System.getProperties()
-   systemProperty("cucumber.junit-platform.naming-strategy", "long")
-   systemProperty "cucumber.features", project.findProperty("cucumber.features") ?: "src/test/resources/features"
-   systemProperty "cucumber.filter.tags", project.findProperty("cucumber.tags") ?: ""
-   systemProperty 'cucumber.glue', 'com.company.steps'
-   systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
-   systemProperty "serenity.outputDirectory", project.findProperty("serenity.outputDirectory") ?: "target/site"
-   systemProperty "serenity.project.name", project.findProperty("serenity.project.name") ?: "Quality Automation"
-
-   // Add the following lines:
-   systemProperty "serenity.test.root", "src/test/resources" // Update the path if necessary
-   systemProperty "serenity.requirements.directory", "src/test/resources/features" // Update the path if necessary
-
-
-   // Test logging configuration
-   testLogging.showStandardStreams = true
-   testClassesDirs = sourceSets.test.output.classesDirs
-   classpath = sourceSets.test.runtimeClasspath
-   testLogging {
-      events 'passed', 'skipped', 'failed'
-   }
-
-   def selectedEnv = project.findProperty('selectedEnv') ?: 'default'
-   envProperties.entrySet().each { entry ->
-      if (entry.key.startsWith("$selectedEnv.")) {
-         systemProperty entry.key - "$selectedEnv.", entry.value
-      }
-   }
-   // Experimentation
-}
-gradle.startParameter.continueOnFailure = true
-
-defaultTasks 'dependencies', 'clean', 'build', 'Lists
-
-tasks.register('deleteBuilds') {
-   doLast {
-      delete 'build'
-      delete '.gradle'
-      delete 'target'
-      // delete 'lib'
-   }
-}
-
-tasks.register('printEnvVariables') {
-   doLast {
-      exec {
-         commandLine 'printenv'
-      }
-   }
-}
-
-tasks.register('verifyEnvironment') {
-   doLast {
-      try {
-         exec {
-            commandLine 'java', '--version'
-            ignoreExitValue true
-            commandLine 'groovy', '--version'
-            ignoreExitValue true
-            commandLine 'mvn', '--version'
-            ignoreExitValue true
-            commandLine 'gradle', '--version'
-            ignoreExitValue true
-         }
-      } catch (ExecException e) {
-         println "One or more commands are not installed: ${e.message}"
-      }
-   }
-}
-tasks.register('Lists') {
-   doLast {
-      gradleTasks()
-      genericTasks()
-   }
-}
-
-tasks.register('importJUnitResultsToXrayDC', Exec) {
-   description 'Imports Junit test results to Xray Test Management for Jira DC.'
-   dependsOn 'test'
-
-   // the following variables can be defined locally or in gradle.properties
-   //  - jiraBaseUrl, jiraUsername, jiraPassword
-   //  - reportFormat, projectKey version, revision, testPlanKey, testExecKey, testEnvironment
-
-   def reportFile = "reports/TEST-junit-jupiter.xml"
-
-   def url = "${jiraBaseUrl}/rest/raven/2.0/import/execution/${reportFormat}?"
-   if (projectKey?.trim()) {
-      url += "&projectKey=${projectKey}"
-   }
-   if (version?.trim()) {
-      url += "&fixVersion=${version}"
-   }
-   if (revision?.trim()) {
-      url += "&revision=${revision}"
-   }
-   if (testPlanKey?.trim()) {
-      url += "&testPlanKey=${testPlanKey}"
-   }
-   if (testExecKey?.trim()) {
-      url += "&testExecKey=${testExecKey}"
-   }
-   if (testEnvironment?.trim()) {
-      url += "&testEnvironments=${testEnvironment}"
-   }
-
-   commandLine 'curl', '--fail-with-body', '-H', 'Content-Type: multipart/form-data', '-u', "${jiraUsername}:${jiraPassword}", '-F', "file=@${reportFile}", url
-
-   //store the output instead of printing to the console:
-   standardOutput = new ByteArrayOutputStream()
-   ignoreExitValue = false //true
-
-   doLast {
-      if (execResult.getExitValue() != 0) {
-         println "ERROR: problem importing results to Xray"
-      } else {
-         println "Results imported to Xray!"
-      }
-      println standardOutput.toString()
-   }
-}
-
+// Task to update Jira status
 tasks.register('updateJiraStatus') {
-   doLast {
-      def jiraUrl, jiraIssueKey, jiraTransitionId, jiraUsername, jiraPassword
+    doLast {
+        def jiraUrl, jiraIssueKey, jiraTransitionId, jiraUsername, jiraPassword
 
-      // Read the details from a CSV file
-      def csvFile = new File('jira_details.csv')
-      CSVReader reader = new CSVReader(new FileReader(csvFile))
-      String[] nextLine
-      while ((nextLine = reader.readNext()) != null) {
-         def key = nextLine[0]
-         def value = nextLine[1]
-         switch (key) {
-            case 'jiraUrl':
-               jiraUrl = value
-               break
-            case 'jiraIssueKey':
-               jiraIssueKey = value
-               break
-            case 'jiraTransitionId':
-               jiraTransitionId = value
-               break
-            case 'jiraUsername':
-               jiraUsername = value
-               break
-            case 'jiraPassword':
-               jiraPassword = value
-               break
-            default:
-               println "Unknown key: ${key}"
-         }
-      }
+        // Load Jira properties from the project.properties file
+        jiraUrl = jiraBaseUrl
+        jiraUsername = project.jiraUsername
+        jiraPassword = project.jiraPassword
 
-      def json = "{\"transition\":{\"id\":\"${jiraTransitionId}\"}}"
-      def url = "${jiraUrl}/rest/api/2/issue/${jiraIssueKey}/transitions"
+        // Read the details from the jira_details.csv using the path from the project.properties file
+        def jiraDetailsPath = project.jiraDetailsPath
+        def csvFile = new File(jiraDetailsPath)
+        CSVReader reader = new CSVReader(new FileReader(csvFile))
+        String[] nextLine
+        while ((nextLine = reader.readNext()) != null) {
+            def key = nextLine[0]
+            def value = nextLine[1]
+            switch (key) {
+                case 'jiraIssueKey':
+                    jiraIssueKey = value
+                    break
+                case 'jiraTransitionId':
+                    jiraTransitionId = value
+                    break
+                default:
+                    println "Unknown key: ${key}"
+            }
+        }
 
-      def command = ["curl", "-D-", "-u", "${jiraUsername}:${jiraPassword}", "-X", "PUT", "-H", "Content-Type: application/json", "-d", json, url]
-      def process = command.execute()
-      process.waitFor()
+        def json = "{\"transition\":{\"id\":\"${jiraTransitionId}\"}}"
+        def url = "${jiraUrl}/rest/api/2/issue/${jiraIssueKey}/transitions"
 
-      println process.text
-   }
-}
+        def command = ["curl", "-D-", "-u", "${jiraUsername}:${jiraPassword}", "-X", "PUT", "-H", "Content-Type: application/json", "-d", json, url]
+        def process = command.execute()
+        process.waitFor()
 
-// Define jiraConnector extension
-ext.jiraConnector = [
-        qualityAutomation: "Your JIRA Connector Configuration"
-]
-
-def gradleTasks() {
-   println "\nGradle Custom Tasks"
-   println "\tInitial : gradle --full-stacktrace; alias gradlew=\"./gradlew\""
-   println "\tDisplay List Custom Tasks : gradlew list"
-   println "\tCompile Java : gradlew compileJava"
-}
-
-def genericTasks() {
-   println "\nGeneral Custom Tasks"
-   println "\tDisplay Local Environments   : gradlew printEnvVariables"
-   println "\tDisplay Current Versions     : gradlew printSetupVersions"
-   println "\tUpgrade Gradle Version       : gradlew --gradle-version <_._>"
-   println "\tDisplay Remove Build Folders : gradlew deleteBuilds"
-   println "\tDisplay Gradle Default Tasks : gradlew task"
-   println "\tExecute Test Suites          : gradlew test"
-   println "\tDebug Argument Options       : gradlew --info|--debug|--full-stacktrace"
-   println "\tDebug Dependency Reports     : gradlew dependencyInsight --dependency <org.company.package:dependency>"
-   println "\tExecute Test Suites          : gradlew test"
-   println "\tDebug :                      : --info --debug --full-stacktrace"
+        println process.text
+    }
 }
