@@ -30,38 +30,9 @@ plugins {
    id 'com.intershop.gradle.jiraconnector' version '6.3.0'
 }
 
-// Load project properties
-def loadProjectProperties() {
-   def properties = new Properties()
-   def propertiesFile = file('project.properties')
-   if (propertiesFile.exists()) {
-      properties.load(propertiesFile.newDataInputStream())
-   }
-   return properties
-}
-
-def projectProperties = loadProjectProperties()
-ext {
-   jiraBaseUrl = projectProperties.getProperty('jiraBaseUrl')
-   jiraUsername = projectProperties.getProperty('jiraUsername')
-   jiraPassword = projectProperties.getProperty('jiraPassword')
-   jiraDetailsPath = projectProperties.getProperty('jiraDetailsPath')
-}
-
-def envProperties = new Properties()
-file("env.properties").withInputStream { envProperties.load(it) }
-
-// Load Serenity properties
-Properties serenityProperties = new Properties()
-file(projectProperties.getProperty('serenityPropertiesPath')).withInputStream { serenityProperties.load(it) }
-
-// Load Cucumber properties
-Properties cucumberProperties = new Properties()
-file(projectProperties.getProperty('cucumberPropertiesPath')).withInputStream { serenityProperties.load(it) }
-
-group = projectProperties.getProperty('group')
-version = projectProperties.getProperty('version')
-description = projectProperties.getProperty('description')
+group = 'com.company'
+version = '1.0-SNAPSHOT'
+description = 'Quality Automation'
 
 import org.gradle.process.internal.ExecException
 import au.com.bytecode.opencsv.CSVReader
@@ -71,8 +42,8 @@ sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
 
 jar {
-   archiveBaseName = projectProperties.getProperty('description')
-   archiveVersion =  projectProperties.getProperty('version')
+   archiveBaseName = 'QualityAutomation'
+   archiveVersion =  '0.0.1'
 }
 
 // Section 4: IDEA project configuration
@@ -100,6 +71,25 @@ configurations {
       extendsFrom testImplementation
    }
 }
+
+def loadProjectProperties() {
+   def properties = new Properties()
+   def propertiesFile = file('project.properties')
+   if (propertiesFile.exists()) {
+      properties.load(propertiesFile.newDataInputStream())
+   }
+   return properties
+}
+
+def projectProperties = loadProjectProperties()
+
+// Load Serenity properties
+Properties serenityProperties = new Properties()
+file("serenity.properties").withInputStream { serenityProperties.load(it) }
+
+// Load Cucumber properties
+Properties cucumberProperties = new Properties()
+file("cucumber.properties").withInputStream { cucumberProperties.load(it) }
 
 // Section 6: External dependency versions
 ext {
@@ -150,29 +140,19 @@ dependencies {
    // Test dependencies
    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
 
-   // Exclude the undesired bindings
-   configurations {
-      all {
-         exclude group: 'net.serenity-bdd', module: 'serenity-cli'
-         exclude group: 'org.sonatype.gossip', module: 'gossip'
-      }
-   }
-   // Add a compatible SLF4J binding
-   implementation 'org.slf4j:slf4j-simple:2.0.7'
-
-   // Experiment
+   // Experiment=
    testImplementation 'org.hamcrest:hamcrest:2.2'
    testImplementation 'app.getxray:xray-junit-extensions:0.6.1'
    implementation 'com.opencsv:opencsv:5.7.0'
 }
+
+
 
 // Section 8: Source sets configuration
 sourceSets {
    main {
       java {
          srcDir 'src/main/java'
-         srcDir 'src/main/groovy'
-         srcDir 'src/main/kotlin'
       }
       resources {
          srcDirs = ['src/main/resources', 'src/main/groovy-resources']
@@ -181,8 +161,6 @@ sourceSets {
    test {
       java {
          srcDir 'src/test/java'
-         srcDir 'src/test/groovy'
-         srcDir 'src/test/kotlin'
       }
       resources {
          srcDirs = ['src/test/resources', 'src/test/groovy-resources']
@@ -209,15 +187,14 @@ tasks.withType(GroovyCompile).configureEach {
    groovyOptions.encoding = 'UTF-8'
 }
 
+def envProperties = new Properties()
+file("env.properties").withInputStream { envProperties.load(it) }
+
+
 // Section 11: Test execution configuration
-
-
 test {
    // Use JUnit Platform for running tests
    useJUnitPlatform()
-
-   // Set the test working directory
-   workingDir = file('src/test')
 
    // Set default value for selected environment
    def selectedEnv = project.findProperty('selectedEnv') ?: 'default'
@@ -254,6 +231,8 @@ test {
    // Set test class directories and classpath
    testClassesDirs = sourceSets.test.output.classesDirs
    classpath = sourceSets.test.runtimeClasspath
+
+   // Experimentation
 }
 
 gradle.startParameter.continueOnFailure = true
@@ -283,8 +262,8 @@ tasks {
             main = 'net.serenitybdd.cli.SerenityCLI'
             classpath = configurations.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
             args = ['aggregate']
-            systemProperty "serenity.test.root", project.findProperty("serenity.test.root") ?: "src/test/java"
-            systemProperty "serenity.requirements.directory", project.findProperty("serenity.requirements.dir") ?: "src/test/resources/features"
+            systemProperty "serenity.test.root", project.findProperty("serenity.test.root") ?: "src/test/resources" // Update the path if necessary
+            systemProperty "serenity.requirements.directory", project.findProperty("serenity.requirements.directory") ?: "src/test/resources/features" // Update the path if necessary
 
          }
       }
@@ -306,8 +285,6 @@ tasks.register('deleteBuilds') {
       delete 'build'
       delete '.gradle'
       delete 'target'
-      delete '.idea'
-      deletee 'out'
       // delete 'lib'
    }
 }
@@ -345,45 +322,11 @@ tasks.register('list') {
    }
 }
 
-tasks.register('updateJiraStatus') {
-   doLast {
-      def jiraUrl, jiraIssueKey, jiraTransitionId, jiraUsername, jiraPassword
-
-      // Load Jira properties from the project.properties file
-      jiraUrl = project.property('jiraBaseUrl')
-      jiraUsername = project.property('jiraUsername')
-      jiraPassword = project.property('jiraPassword')
-
-      // Read the details from the jira_details.csv using the path from the project.properties file
-      def jiraDetailsPath = project.property('jiraDetailsPath')
-      def csvFile = new File(jiraDetailsPath)
-      CSVReader reader = new CSVReader(new FileReader(csvFile))
-      String[] nextLine
-      while ((nextLine = reader.readNext()) != null) {
-         def key = nextLine[0]
-         def value = nextLine[1]
-         switch (key) {
-            case 'jiraIssueKey':
-               jiraIssueKey = value
-               break
-            case 'jiraTransitionId':
-               jiraTransitionId = value
-               break
-            default:
-               println "Unknown key: ${key}"
-         }
-      }
-
-      def json = "{\"transition\":{\"id\":\"${jiraTransitionId}\"}}"
-      def url = "${jiraUrl}/rest/api/2/issue/${jiraIssueKey}/transitions"
-
-      def command = ["curl", "-D-", "-u", "${jiraUsername}:${jiraPassword}", "-X", "PUT", "-H", "Content-Type: application/json", "-d", json, url]
-      def process = command.execute()
-      process.waitFor()
-
-      println process.text
-   }
+tasks.register('importJUnitResultsToXrayDC', Exec) {
+   def url = "${project.property('jiraBaseUrl')}/rest/raven/2.0/import/execution/${project.property('reportFormat')}?"
+   commandLine 'curl', '--fail-with-body', '-H', 'Content-Type: multipart/form-data', '-u', "${project.property('jiraUsername')}:${project.property('jiraPassword')}", '-F', "file=@${reportFile}", url
 }
+
 
 // Define jiraConnector extension
 ext.jiraConnector = [

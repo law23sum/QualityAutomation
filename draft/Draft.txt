@@ -1,40 +1,26 @@
+gradlew test aggregate
+gradle clean compileJava test importJUnitResultsToXrayDC
+gradlew test
+gradlew tasks
+gradlew test -Pcucumber.features="src/test/resources/features" -Pcucumber.glue="com.company.steps"
+gradlew test -Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature" -Pcucumber.glue="com.company.steps" -Pcucumber.tags="@tag1 or @tag2" -Pcucumber.options="--plugin json:target/cucumber-report.json" -PmaxParallelForks=4 --info --tests "com.company.tests.SomeTestClass"
 
-ext {
-    junitVersion = '5.9.2'
-    cucumberJavaVersion = '7.11.2'
-    cucumberJUnitPlatformEngineVersion = '7.11.2'
-    serenityCoreVersion = '3.3.6'
-    serenityJUnit5Version = '3.3.6'
-    serenityCucumberVersion = '3.6.22'
-    groovyMavenPluginVersion = '1.5'
-    slf4jApiVersion = '2.0.7'
-    restAssuredVersion = '5.3.0'
-    seleniumVersion = '4.8.1'
-}
-
-// Dependencies for the project
-dependencies {
+gradlew clean compileJava test
+-Pcucumber.glue="com.company.steps"
+-Pcucumber.tags="@tag1 or @tag2"
+-Pcucumber.options="--plugin json:target/cucumber-report.json"
+-PmaxParallelForks=4
+--PselectedEnv=staging
+--info or --debug or --quiet or --warn
+--tests "com.company.tests.SomeTestClass"
+webdriver.start.maximized = true
 
 
-
-    // Cucumber
-    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
-    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
-
-    // Serenity and Cucumber integration
-    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
-    implementation "net.serenity-bdd:serenity-junit5:${serenityJUnit5Version}"
-
-    // REST Assured
-    testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
-
-    // Appium Java client
-    implementation 'io.appium:java-client:7.6.0'
-
-    // Selenium WebDriver
-    testImplementation 'org.seleniumhq.selenium:selenium-java:${seleniumVersion}'
-
-    // Groovy
-    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
-    implementation 'org.codehaus.groovy:groovy-all:2.4.15'
-}
+https://docs.getxray.app/display/XRAY/Integration+with+eazyBI
+https://docs.getxray.app/display/XRAY/Importing+Cucumber+Tests+-+REST
+https://docs.getxray.app/display/XRAY/Import+Execution+Results#ImportExecutionResults-CucumberJSONoutputformat
+https://docs.getxray.app/display/XRAY/Import+Execution+Results+-+REST
+https://docs.getxray.app/display/XRAY/REST+API
+https://github.com/rest-assured/rest-assured/wiki/GettingStarted
+https://serenity-bdd.github.io/docs/mobile/appium
+https://serenity-bdd.github.io/docs/mobile/appium

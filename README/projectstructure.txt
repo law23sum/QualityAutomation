@@ -1,0 +1,82 @@
+project-root/
+├── build.gradle
+├── settings.gradle
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   ├── com/
+│   │   │   │   ├── company/
+│   │   │   │   │   ├── driver/
+│   │   │   │   │   │   ├── ChromeDriverFactory.java
+│   │   │   │   │   │   ├── WebDriverFactory.java
+│   │   │   │   │   │   ├── WebAppApi.java
+│   │   │   │   │   │   ├── MobileWebApi.java
+│   │   │   │   │   │   ├── DesktopApi.java
+│   │   │   │   │   │   ├── EmulatorApi.java
+│   │   │   │   │   │   ├── MainframeApi.java
+│   │   │   │   │   │   └── Api.java
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   │   ├── HomePage.java
+│   │   │   │   │   │   └── LoginPage.java
+│   │   │   │   │   ├── utils/
+│   │   │   │   │   │   ├── ConfigReader.java
+│   │   │   │   │   │   ├── Constants.java
+│   │   │   │   │   │   ├── DriverManager.java
+│   │   │   │   │   │   ├── TestData.java
+│   │   │   │   │   │   ├── Utils.java
+│   │   │   │   │   │   └── ApiUtils.java
+│   │   │   │   │   └── App.java
+│   │   │   ├── resources/
+│   │   │   │   ├── config/
+│   │   │   │   │   ├── environment.properties
+│   │   │   │   │   ├── webapp.properties
+│   │   │   │   │   ├── mobileweb.properties
+│   │   │   │   │   ├── desktop.properties
+│   │   │   │   │   ├── emulator.properties
+│   │   │   │   │   └── mainframe.properties
+│   │   │   │   ├── drivers/
+│   │   │   │   │   ├── chromedriver.exe
+│   │   │   │   │   ├── geckodriver.exe
+│   │   │   │   │   ├── appium.exe
+│   │   │   │   │   └── emulator.exe
+│   ├── test/
+│   │   ├── java/
+│   │   │   ├── com/
+│   │   │   │   ├── company/
+│   │   │   │   │   ├── runners/
+│   │   │   │   │   │   ├── AllTestRunner.java
+│   │   │   │   │   │   ├── Domain0TestRunner.java
+│   │   │   │   │   │   ├── Domain1TestRunner.java
+│   │   │   │   │   │   ├── Domain2TestRunner.java
+│   │   │   │   │   │   ├── Domain3TestRunner.java
+│   │   │   │   │   │   └── MainframeTestRunner.java
+│   │   │   │   │   ├── steps/
+│   │   │   │   │   │   ├── common/
+│   │   │   │   │   │   │    └── glue/
+│   │   │   │   │   │   │      ├─── WebSteps.java
+│   │   │   │   │   │   │      ├─── RESTFULSteps.java
+│   │   │   │   │   │   │      ├─── DesktopSteps.java
+│   │   │   │   │   │   │      └─── MobileSteps.java
+│   │   │   │   │   │   ├── domain0/
+│   │   │   │   │   │   │   ├── application0/
+│   │   │   │   │   │   │   ├── application1/
+│   │   │   │   │   │   │   ├── application2/
+│   │   │   │   │   │   ├── domain1/
+│   │   │   │   │   │   │   ├── application0/
+│   │   │   │   │   │   │   ├── application1/
+│   │   │   │   │   │   │   ├── application2/
+│   │   │   │   │   │   ├── domain2/
+│   │   │   │   │   │   │   ├── application0/
+│   │   │   │   │   │   │   ├── application1/
+│   │   │   │   │   │   │   └── application2/
+│   │   │   ├── resources/
+│   │   │   │   ├── features/
+│   │   │   │   │   ├── application.feature
+│   │   │   │   │   ├── application.feature
+│   │   │   │   │   └── application.feature
+│   │   │   │   ├── testdata/
+│   │   │   │   │   ├── loginTestData.csv
+│   │   │   │   │   └── loginTestData.json
