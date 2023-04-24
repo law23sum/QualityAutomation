@@ -2,7 +2,7 @@
  This `build.gradle` file is organized into the following sections:
 
  1. Plugins: Define the plugins required for the project.
- 2. Basic project information: Set the project's group, version, and description.
+ 2. Project Details: Domain, Environment, Configuration Properties.
  3. Java source and target compatibility: Configure the Java version.
  4. IDEA project configuration: Configure the IntelliJ IDEA project settings.
  5. Repositories: Define the repositories for fetching dependencies.
@@ -12,6 +12,20 @@
  9. Maven publishing configuration: Configure the Maven publishing settings.
  10. Compiler options: Set the Java compiler options.
  11. Test execution configuration: Configure
+
+ Explanation per Section is defined and provided
+
+ 1. Plugins: This section defines the required plugins for the project, such as 'java', 'groovy', 'maven-publish', and other experimental plugins
+ 2. Project Details: This section will be used to define and configure project-specific properties related to the domain, environment, and other configuration settings. This may include information like project group, version, description, and custom properties related to the build environment, such as target platforms, SDK versions, or environment variables
+ 3. Java source and target compatibility: This section configures the Java version for source and target compatibility using the 'javaVersion' property.
+ 4. IDEA project configuration: This section configures the IntelliJ IDEA project settings, including downloading Javadoc and sources.
+ 5. Repositories: This section defines the repositories for fetching dependencies, such as 'mavenCentral()' and 'google()'. 6.
+ 6. External dependency versions: This section sets the versions for external dependencies using variables like 'junitVersion', 'cucumberJavaVersion', and 'serenityVersion'.
+ 7. Dependencies: This section defines the project dependencies, including JUnit, Cucumber, Serenity, REST Assured, Appium Java client, Selenium WebDriver, and Groovy.
+ 8. Source sets configuration: This section configures the source sets for the project, specifying the main and test sources and resources directories.
+ 9. Maven publishing configuration: This section configures the Maven publishing settings, defining the publication and components.
+ 10. Compiler options: This section sets the Java compiler options, such as encoding and compiler arguments.
+ 11. Test execution configuration: This section configures the test execution, including setting system properties, Serenity properties, Cucumber properties, and WebDriver properties. Additionally, it configures test logging, test class directories, and classpath.
  */
 
 // Section 1: Plugins
@@ -28,8 +42,10 @@ plugins {
    // Experimenting with plugins
    id 'com.jfrog.bintray' version '1.8.5'
    id 'com.intershop.gradle.jiraconnector' version '6.3.0'
+   id 'nu.studer.credentials' version '2.1'
 }
 
+// Section 2: Project Details: Domain, Environment, Configuration Properties
 // Load project properties
 def loadProjectProperties() {
    def properties = new Properties()
@@ -102,6 +118,8 @@ configurations {
 }
 
 // Section 6: External dependency versions
+//
+// Note - Adding a '+' value at the end of the integer implicates that version or newer
 ext {
    junitVersion = '5.9.2'
    cucumberJavaVersion = '7.11.2'
@@ -114,19 +132,22 @@ ext {
    slf4jApiVersion = '2.0.7'
    restAssuredVersion = '5.3.0'
    seleniumVersion = '4.8.1'
+   hamcrestVersion = '2.2'
+   xrayJunitExtensionsVersion = '0.6.1'
+   opencsvVersion = '5.7.0'
 }
 
 // Section 7: Dependencies
 dependencies {
-   // JUnit 4 for backward compatible + JUnit 5
-   testImplementation 'junit:junit:4.13.1'
+   // JUnit and Cucumber
+   testImplementation 'junit:junit:4.13.1' // JUnit 4 for backward compatibility
    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
    testImplementation "io.cucumber:cucumber-java:${cucumberJavaVersion}"
    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberJUnitPlatformEngineVersion}"
 
-   // Serenity and Cucumber integration for testing
-   testImplementation "org.slf4j:slf4j-simple:1.7.30"
+   // Serenity
+   testImplementation "org.slf4j:slf4j-simple:${slf4jApiVersion}"
    implementation "net.serenity-bdd:serenity-core:${serenityCoreVersion}"
    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityCucumberVersion}"
    implementation "net.serenity-bdd:serenity-cli:${serenityVersion}"
@@ -137,33 +158,27 @@ dependencies {
    // REST Assured
    testImplementation "io.rest-assured:spring-web-test-client:${restAssuredVersion}"
 
-   // For using WinAppDriver
-   // Appium Java client
-   implementation 'io.appium:java-client:8.3.0'
-
-   // Selenium WebDriver
+   // WinAppDriver and Selenium WebDriver
+   implementation 'io.appium:java-client:8.3.0' // Appium Java client
    testImplementation "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
-   // Groovy
+
+   // Groovy and Maven
    implementation "org.codehaus.mojo:groovy-maven-plugin:${groovyMavenPluginVersion}"
    implementation 'org.codehaus.groovy:groovy-all:2.4.15'
-
-   // Test dependencies
    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
 
-   // Exclude the undesired bindings
+   // Logging
    configurations {
       all {
-         exclude group: 'net.serenity-bdd', module: 'serenity-cli'
          exclude group: 'org.sonatype.gossip', module: 'gossip'
       }
    }
-   // Add a compatible SLF4J binding
-   implementation 'org.slf4j:slf4j-simple:2.0.7'
+   implementation "org.slf4j:slf4j-simple:${slf4jApiVersion}"
 
    // Experiment
-   testImplementation 'org.hamcrest:hamcrest:2.2'
-   testImplementation 'app.getxray:xray-junit-extensions:0.6.1'
-   implementation 'com.opencsv:opencsv:5.7.0'
+   testImplementation "org.hamcrest:hamcrest:${hamcrestVersion}"
+   testImplementation "app.getxray:xray-junit-extensions:${xrayJunitExtensionsVersion}"
+   implementation "com.opencsv:opencsv:${opencsvVersion}"
 }
 
 // Section 8: Source sets configuration
@@ -196,22 +211,18 @@ publishing {
       mavenJava(MavenPublication) {
          from components.java
       }
+      /*repositories {
+         maven {
+            url = uri(project.properties['mavenRepositoryUrl'])
+            credentials {
+               username = project.properties['mavenRepositoryUsername']
+               password = project.properties['mavenRepositoryPassword']
+         }
+      }*/
    }
 }
 
-// Section 10: Compiler options
-tasks.withType(JavaCompile).configureEach {
-   options.encoding = 'UTF-8'
-   options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
-}
-
-tasks.withType(GroovyCompile).configureEach {
-   groovyOptions.encoding = 'UTF-8'
-}
-
 // Section 11: Test execution configuration
-
-
 test {
    // Use JUnit Platform for running tests
    useJUnitPlatform()
@@ -230,7 +241,9 @@ test {
    }
 
    // Set system properties
-   systemProperties System.getProperties()
+   doFirst {
+      systemProperties System.getProperties()
+   }
 
    // Set Serenity properties
    serenityProperties.each { key, value ->
@@ -258,17 +271,19 @@ test {
 
 gradle.startParameter.continueOnFailure = true
 
-defaultTasks 'dependencies', 'clean', 'test', 'list'
+defaultTasks 'dependencies', 'clean', 'verify', 'tasks', 'test', 'list'
 
 tasks {
    // Compile and package the application code
    assemble {
-      // ...
+      doFirst {
+         compileJava
+         compileGroovy
+      }
    }
-
-// Run the Serenity CLI task
+   // Run the Serenity CLI task
    serenity {
-      dependsOn assemble, compileGroovy, compileJava
+      dependsOn assemble
       doFirst {
          javaexec {
             main = "net.serenitybdd.cucumber.cli.Main"
@@ -301,13 +316,14 @@ configurations.configureEach {
    }
 }
 
+
 tasks.register('deleteBuilds') {
    doLast {
       delete 'build'
       delete '.gradle'
       delete 'target'
       delete '.idea'
-      deletee 'out'
+      delete 'out'
       // delete 'lib'
    }
 }
@@ -338,6 +354,7 @@ tasks.register('verifyEnvironment') {
       }
    }
 }
+
 tasks.register('list') {
    doLast {
       gradleTasks()

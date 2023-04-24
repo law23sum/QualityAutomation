@@ -1,43 +1,25 @@
+import org.gradle.util.GradleVersion
 
-// Add your other build.gradle configurations and dependencies here
+def gradleWrapperVersion = findProperty('gradleWrapperVersion') ?: '7.2'
 
-// Task to update Jira status
-tasks.register('updateJiraStatus') {
+task checkAndUpdateGradleWrapper {
     doLast {
-        def jiraUrl, jiraIssueKey, jiraTransitionId, jiraUsername, jiraPassword
+        def currentGradleVersion = GradleVersion.current().baseVersion
+        def targetGradleVersion = GradleVersion.version(gradleWrapperVersion)
 
-        // Load Jira properties from the project.properties file
-        jiraUrl = jiraBaseUrl
-        jiraUsername = project.jiraUsername
-        jiraPassword = project.jiraPassword
+        if (currentGradleVersion < targetGradleVersion) {
+            println "Updating Gradle Wrapper from version ${currentGradleVersion} to ${targetGradleVersion}..."
 
-        // Read the details from the jira_details.csv using the path from the project.properties file
-        def jiraDetailsPath = project.jiraDetailsPath
-        def csvFile = new File(jiraDetailsPath)
-        CSVReader reader = new CSVReader(new FileReader(csvFile))
-        String[] nextLine
-        while ((nextLine = reader.readNext()) != null) {
-            def key = nextLine[0]
-            def value = nextLine[1]
-            switch (key) {
-                case 'jiraIssueKey':
-                    jiraIssueKey = value
-                    break
-                case 'jiraTransitionId':
-                    jiraTransitionId = value
-                    break
-                default:
-                    println "Unknown key: ${key}"
-            }
+            tasks.wrapper {
+                gradleVersion = gradleWrapperVersion
+                distributionType = Wrapper.DistributionType.ALL
+            }.generateWrapper()
+
+            println "Gradle Wrapper has been updated to version ${targetGradleVersion}."
+        } else {
+            println "Gradle Wrapper version ${currentGradleVersion} is up to date."
         }
-
-        def json = "{\"transition\":{\"id\":\"${jiraTransitionId}\"}}"
-        def url = "${jiraUrl}/rest/api/2/issue/${jiraIssueKey}/transitions"
-
-        def command = ["curl", "-D-", "-u", "${jiraUsername}:${jiraPassword}", "-X", "PUT", "-H", "Content-Type: application/json", "-d", json, url]
-        def process = command.execute()
-        process.waitFor()
-
-        println process.text
     }
 }
+
+./gradlew checkAndUpdateGradleWrapper

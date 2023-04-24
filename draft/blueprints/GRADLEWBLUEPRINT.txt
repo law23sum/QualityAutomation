@@ -83,5 +83,3 @@ task printEnvVariables {
 task deleteBuilds {
     // Delete build-related folders
 }
-
-java cannot run when vpn is active.

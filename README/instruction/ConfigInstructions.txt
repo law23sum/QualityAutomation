@@ -52,6 +52,9 @@ IntelliJ Configurations Instructions
                   Uncheck : "Enable issue cache"
                   Navigate : Window -> Store Current Layout as Default
                   Action : Customize and save your layout to reduce resource usage
+         Store Current Layout as Default
+                  Navigate : Window -> Store Current Layout as Default
+                  Action : Customize and save your layout to reduce resource usage
 
          Help
                   Set : Edit Custom VM Options ->
