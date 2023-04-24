@@ -353,3 +353,168 @@ def genericTasks() {
    println "\tExecute Test Suites          : gradlew test"
    println "\tDebug :                      : --info --debug --full-stacktrace"
 }
+
+// Load project properties
+def loadProjectProperties() {
+    // ...
+}
+
+def projectProperties = loadProjectProperties()
+ext {
+    // ...
+}
+
+def envProperties = new Properties()
+file("env.properties").withInputStream { envProperties.load(it) }
+
+// Load Serenity properties
+Properties serenityProperties = new Properties()
+file(projectProperties.getProperty('serenityPropertiesPath')).withInputStream { serenityProperties.load(it) }
+
+// Load Cucumber properties
+Properties cucumberProperties = new Properties()
+file(projectProperties.getProperty('cucumberPropertiesPath')).withInputStream { serenityProperties.load(it) }
+
+group = projectProperties.getProperty('group')
+version = projectProperties.getProperty('version')
+description = projectProperties.getProperty('description')
+
+import org.gradle.process.internal.ExecException
+import au.com.bytecode.opencsv.CSVReader
+
+// Section 1: Plugins
+plugins {
+    // ...
+}
+
+// Section 2: Basic project information
+group = 'com.example'
+version = '1.0.0'
+description = 'Example project'
+
+// Section 3: Properties
+ext {
+    javaVersion = '11'
+    serenityVersion = '2.3.6'
+    cucumberVersion = '6.9.1'
+}
+
+// Section 4: Java source and target compatibility
+sourceCompatibility = JavaVersion.toVersion(properties['javaVersion'])
+targetCompatibility = JavaVersion.toVersion(properties['javaVersion'])
+
+// Section 5: IDEA project configuration
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+// Section 6: Repositories
+repositories {
+    mavenCentral()
+    google()
+}
+
+// Section 7: External dependency versions
+ext {
+    // ...
+}
+
+// Section 8: Dependencies
+dependencies {
+    // ...
+}
+
+// Section 9: Source sets configuration
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+            srcDir 'src/main/groovy'
+            srcDir 'src/main/kotlin'
+        }
+        resources {
+            srcDirs = ['src/main/resources', 'src/main/groovy-resources']
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/java'
+            srcDir 'src/test/groovy'
+            srcDir 'src/test/kotlin'
+        }
+        resources {
+            srcDirs = ['src/test/resources', 'src/test/groovy-resources']
+        }
+    }
+}
+
+// Section 10: Maven publishing configuration
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+// Section 11: Compiler options
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+}
+
+tasks.withType(GroovyCompile).configureEach {
+    groovyOptions.encoding = 'UTF-8'
+}
+
+// Section 12: Test execution configuration
+test {
+    // ...
+}
+
+
+// Add your other build.gradle configurations and dependencies here
+
+// Task to update Jira status
+tasks.register('updateJiraStatus') {
+    doLast {
+        def jiraUrl, jiraIssueKey, jiraTransitionId, jiraUsername, jiraPassword
+
+        // Load Jira properties from the project.properties file
+        jiraUrl = jiraBaseUrl
+        jiraUsername = project.jiraUsername
+        jiraPassword = project.jiraPassword
+
+        // Read the details from the jira_details.csv using the path from the project.properties file
+        def jiraDetailsPath = project.jiraDetailsPath
+        def csvFile = new File(jiraDetailsPath)
+        CSVReader reader = new CSVReader(new FileReader(csvFile))
+        String[] nextLine
+        while ((nextLine = reader.readNext()) != null) {
+            def key = nextLine[0]
+            def value = nextLine[1]
+            switch (key) {
+                case 'jiraIssueKey':
+                    jiraIssueKey = value
+                    break
+                case 'jiraTransitionId':
+                    jiraTransitionId = value
+                    break
+                default:
+                    println "Unknown key: ${key}"
+            }
+        }
+
+        def json = "{\"transition\":{\"id\":\"${jiraTransitionId}\"}}"
+        def url = "${jiraUrl}/rest/api/2/issue/${jiraIssueKey}/transitions"
+
+        def command = ["curl", "-D-", "-u", "${jiraUsername}:${jiraPassword}", "-X", "PUT", "-H", "Content-Type: application/json", "-d", json, url]
+        def process = command.execute()
+        process.waitFor()
+
+        println process.text
+    }
+}
