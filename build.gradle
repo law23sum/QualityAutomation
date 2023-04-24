@@ -99,6 +99,9 @@ idea {
    }
 }
 
+wrapper {
+   gradleVersion = project.gradleVersion
+}
 // Section 5: Repositories
 repositories {
    mavenCentral()
