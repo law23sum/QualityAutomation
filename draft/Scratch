@@ -22,4 +22,9 @@ task checkAndUpdateGradleWrapper {
     }
 }
 
-./gradlew checkAndUpdateGradleWrapper
+./gradlew checkAndUpdateGradleWrappe<build>
+                                        <plugins>
+
+                                        </plugins>
+                                    </build>
+r

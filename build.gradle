@@ -80,6 +80,8 @@ group = projectProperties.getProperty('group')
 version = projectProperties.getProperty('version')
 description = projectProperties.getProperty('description')
 
+
+import com.github.dockerjava.api.command.CreateServiceCmd
 import org.gradle.process.internal.ExecException
 import au.com.bytecode.opencsv.CSVReader
 
@@ -237,7 +239,6 @@ publishing {
       }*/
    }
 }
-
 // Section 11: Test execution configuration
 test {
    // Use JUnit Platform for running tests
@@ -259,30 +260,35 @@ test {
    // Set system properties
    doFirst {
       systemProperties System.getProperties()
+      // Get cucumber tags from command line or use default empty string
+      def cucumberTags = project.findProperty('cucumber.tags') ?: ""
+
+      // Update the 'cucumber.filter.tags' property with the new value
+      systemProperty "cucumber.filter.tags", System.getProperty("cucumber.filter.tags")
+
+      // Set WebDriver properties
+      systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
+
+      // Configure test logging
+      testLogging.showStandardStreams = true
+      // Set test class directories and classpath
+      testClassesDirs = sourceSets.test.output.classesDirs
+      classpath = sourceSets.test.runtimeClasspath
    }
 
-   // Set Serenity properties
+// Set Serenity properties
    serenityProperties.each { key, value ->
       systemProperty key, value
    }
 
-   // Set Cucumber properties
+// Set Cucumber properties
    cucumberProperties.each { key, value ->
       systemProperty key, value
    }
 
-   // Set WebDriver properties
-   systemProperty "webdriver.base.url", project.findProperty("webdriver.base.url") ?: "http://localhost:8080"
-
-   // Configure test logging
-   testLogging.showStandardStreams = true
    testLogging {
       events 'passed', 'skipped', 'failed'
    }
-
-   // Set test class directories and classpath
-   testClassesDirs = sourceSets.test.output.classesDirs
-   classpath = sourceSets.test.runtimeClasspath
 }
 
 gradle.startParameter.continueOnFailure = true
@@ -300,15 +306,19 @@ tasks {
    // Compile and package the application code
    assemble {
       doFirst {
-         compileJava
-         compileGroovy
+          exec {
+             compileJava
+             compileGroovy
+             commandLine 'mvn', 'net.serenity-bdd.maven.plugins:serenity-maven-plugin:3.5.1:aggregate'
+             application
+          }
       }
    }
    // Run the Serenity CLI task
    serenity {
       dependsOn assemble
       doFirst {
-         javaexec {
+            javaexec {
             main = "net.serenitybdd.cucumber.cli.Main"
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
             args = ['--plugin', 'pretty',
