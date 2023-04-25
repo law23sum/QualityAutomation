@@ -15,7 +15,15 @@
                  Enter into the terminal       =>     gradle : gradle list
                  Update version                =>     gradle : ctrl + shift + F = gradle-<version>
             Test
-                 Insert args per attribute     =>     gradle :
+                 Insert args per attribute     =>     gradle : gradlew -Dcucumber.filter.tags="@E2E"
+                                                                       -Dcucumber.features="src/test/resources/features"
+                                                                       -Dcucumber.glue="com.company.steps"
+                                                                       -Dcucumber.options="--plugin json:target/cucumber-report.json"
+                                                                       -DmaxParallelForks=4
+                                                                       --info or --debug or --quiet or --warn
+
+                                                                       --PselectedEnv=staging
+                                                                       webdriver.start.maximized = true
             Report
                  <Details>
 

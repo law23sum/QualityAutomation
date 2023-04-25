@@ -1,20 +1,4 @@
-gradlew test aggregate
 gradle clean compileJava test importJUnitResultsToXrayDC
-gradlew test tasks
-gradlew tasks
-gradlew test -Pcucumber.features="src/test/resources/features" -Pcucumber.glue="com.company.steps"
-gradlew test -Pcucumber.features="src/test/resources/features/WebAppsScenariosSpecificZero.feature" -Pcucumber.glue="com.company.steps" -Pcucumber.tags="@tag1 or @tag2" -Pcucumber.options="--plugin json:target/cucumber-report.json" -PmaxParallelForks=4 --info --tests "com.company.tests.SomeTestClass"
-
-gradlew clean compileJava test
--Pcucumber.glue="com.company.steps"
--Pcucumber.tags="@tag1 or @tag2"
--Pcucumber.options="--plugin json:target/cucumber-report.json"
--PmaxParallelForks=4
---PselectedEnv=staging
---info or --debug or --quiet or --warn
---tests "com.company.tests.SomeTestClass"
-webdriver.start.maximized = true
-
 
 https://docs.getxray.app/display/XRAY/Integration+with+eazyBI
 https://docs.getxray.app/display/XRAY/Importing+Cucumber+Tests+-+REST
@@ -24,33 +8,3 @@ https://docs.getxray.app/display/XRAY/REST+API
 https://github.com/rest-assured/rest-assured/wiki/GettingStarted
 https://serenity-bdd.github.io/docs/mobile/appium
 import org.gradle.util.GradleVersion
-
-
-
-def gradleWrapperVersion = findProperty('gradleWrapperVersion') ?: '7.2'
-
-task gradlewUpdate {
-    doLast {
-        def currentGradleVersion = GradleVersion.current().baseVersion
-        def targetGradleVersion = GradleVersion.version(gradleWrapperVersion)
-
-        if (currentGradleVersion < targetGradleVersion) {
-            println "Updating Gradle Wrapper from version ${currentGradleVersion} to ${targetGradleVersion}..."
-
-            tasks.wrapper {
-                gradleVersion = gradleWrapperVersion
-                distributionType = Wrapper.DistributionType.ALL
-            }.generateWrapper()
-
-            println "Gradle Wrapper has been updated to version ${targetGradleVersion}."
-        } else {
-            println "Gradle Wrapper version ${currentGradleVersion} is up to date."
-        }
-    }
-}
-
-
-tasks.register('aggregate') {
-   outputs.cacheIf { true }
-   outputs.dir("$buildDir/aggregateOutput")
-}
