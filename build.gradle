@@ -238,7 +238,16 @@ publishing {
          }
       }*/
    }
-}
+
+// Section 10: Compiler options
+   tasks.withType(JavaCompile).configureEach {
+      options.encoding = 'UTF-8'
+      options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+   }
+
+   tasks.withType(GroovyCompile).configureEach {
+      groovyOptions.encoding = 'UTF-8'
+   }}
 // Section 11: Test execution configuration
 test {
    // Use JUnit Platform for running tests
