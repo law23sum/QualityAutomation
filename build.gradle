@@ -30,6 +30,7 @@
 
 // Section 1: Plugins
 plugins {
+   id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.25'
    id 'net.serenity-bdd.serenity-gradle-plugin' version '3.5.0+'
    id 'java'
    id 'org.gradle.java-library'
